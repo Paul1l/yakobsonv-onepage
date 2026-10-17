@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Владислав Якобсон — сайты, SEO и автоматизация</title>
+  <meta name="description" content="Независимый веб-специалист Владислав Якобсон: разработка сайтов, SEO, переработка дизайна, ИИ-ассистенты и автоматизация. Сайты с характером и продуманной логикой.">
+  <meta name="theme-color" content="#111213">
+  <meta name="color-scheme" content="dark">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="YAKOBSON V.">
+  <meta property="og:title" content="Владислав Якобсон — сайты, SEO и автоматизация">
+  <meta property="og:description" content="Сайты с характером и продуманной логикой. От первого впечатления — к действию.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/inter-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">К содержанию</a>
+
+  <!-- 1. Шапка -->
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="logo" href="#top">YAKOBSON V.</a>
+      <p class="site-header__tag">Независимый веб-специалист</p>
+      <button class="menu-toggle" type="button" data-menu-toggle aria-haspopup="dialog" aria-expanded="false" aria-controls="site-menu">
+        <span>Меню</span>
+        <span class="menu-toggle__icon" aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- 2. Первый экран -->
+    <section id="top" class="hero" aria-labelledby="hero-title">
+      <div class="hero__glow" aria-hidden="true"></div>
+      <div class="container hero__inner">
+        <h1 id="hero-title" class="hero__title">
+          <span class="hero__line">ВЫДЕЛЯТЬСЯ.</span>
+          <span class="hero__line">БЫТЬ ПОНЯТНЫМ.</span>
+        </h1>
+        <p class="hero__sub">Сайты с характером и продуманной логикой.<br>От первого впечатления — к действию.</p>
+        <div class="hero__actions">
+          <a class="btn btn--ghost" href="#directions">Смотреть решения</a>
+          <a class="round-link" href="#overview" aria-label="Прокрутить к следующему разделу">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M12 5v14m0 0-6-6m6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a class="btn btn--primary" href="#contacts">Обсудить проект</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Ноутбук с аналитикой -->
+    <section id="overview" class="section section--tight overview" aria-labelledby="overview-title">
+      <div class="container">
+        <h2 id="overview-title" class="h2 h2--center" data-reveal>Всё важное.<br><span class="h2__soft">На одном экране.</span></h2>
+      </div>
+      <div class="laptop-stage" data-laptop data-reveal>
+        <div class="laptop">
+          <div class="laptop__lid">
+            <span class="laptop__cam" aria-hidden="true"></span>
+            <div class="laptop__screen">
+              <div class="dash">
+                <div class="dash__top">
+                  <p class="dash__title">Аналитика сайта <span class="dash__period">· последние 30 дней</span></p>
+                  <p class="dash__badge">Демонстрационные данные</p>
+                </div>
+                <dl class="dash__kpis">
+                  <div class="kpi">
+                    <dt class="kpi__label">Органический трафик</dt>
+                    <dd class="kpi__value">14&nbsp;280</dd>
+                    <dd class="kpi__unit">визитов в месяц</dd>
+                    <dd class="kpi__delta">рост 14.2%</dd>
+                  </div>
+                  <div class="kpi">
+                    <dt class="kpi__label">Запросы в топ-10</dt>
+                    <dd class="kpi__value">127</dd>
+                    <dd class="kpi__unit">запросов</dd>
+                    <dd class="kpi__delta">+18 за месяц</dd>
+                  </div>
+                  <div class="kpi">
+                    <dt class="kpi__label">Конверсия</dt>
+                    <dd class="kpi__value">3.4%</dd>
+                    <dd class="kpi__unit">из визитов в заявки</dd>
+                    <dd class="kpi__delta">+0.8 п.п.</dd>
+                  </div>
+                  <div class="kpi">
+                    <dt class="kpi__label">Заявки</dt>
+                    <dd class="kpi__value">482</dd>
+                    <dd class="kpi__unit">за месяц</dd>
+                    <dd class="kpi__delta">+28%</dd>
+                  </div>
+                </dl>
+                <div class="dash__table-wrap">
+                  <table class="dash__table">
+                    <caption>Топ страниц по росту</caption>
+                    <thead>
+                      <tr><th scope="col">Страница</th><th scope="col">Визиты</th><th scope="col">Рост</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><th scope="row">/услуги/основная</th><td>4&nbsp;210</td><td class="is-up">+38%</td></tr>
+                      <tr><th scope="row">/каталог/категория</th><td>2&nbsp;880</td><td class="is-up">+22%</td></tr>
+                      <tr><th scope="row">/блог/руководство</th><td>1&nbsp;640</td><td class="is-up">+54%</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <dl class="dash__foot">
+                  <div><dt>Время на сайте</dt><dd>2:48</dd></div>
+                  <div><dt>Глубина просмотра</dt><dd>3.4 страницы</dd></div>
+                </dl>
+              </div>
+            </div>
+          </div>
+          <div class="laptop__base" aria-hidden="true"><span class="laptop__deck"></span><span class="laptop__lip"><span class="laptop__notch"></span></span></div>
+          <div class="laptop__shadow" aria-hidden="true"></div>
+        </div>
+      </div>
+      <p class="overview__note" data-reveal>Интерфейс-пример: все показатели на экране — демонстрационные.</p>
+    </section>
+
+    <!-- 4. Девять направлений -->
+    <section id="directions" class="section directions" aria-labelledby="directions-title">
+      <div class="container">
+        <h2 id="directions-title" class="h2 h2--center" data-reveal>Девять направлений.<br><span class="h2__soft">Один подрядчик.</span></h2>
+      </div>
+      <div class="carousel" data-carousel role="region" aria-roledescription="карусель" aria-label="Направления работы" data-reveal>
+        <ul class="carousel__list" id="directions-list">
+          <li class="dcard" data-card style="--a1:#8fd8bb;--a2:#a48ff0">
+            <span class="dcard__num">01</span>
+            <svg class="dcard__art" viewBox="0 0 160 96" aria-hidden="true" focusable="false">
+              <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--a1)"/><stop offset="1" style="stop-color:var(--a2)"/></linearGradient></defs>
+              <rect x="8" y="8" width="144" height="80" rx="10" fill="none" stroke="url(#g1)" stroke-width="1.5" opacity=".9"/>
+              <rect x="20" y="20" width="56" height="8" rx="4" fill="url(#g1)" opacity=".9"/>
+              <rect x="20" y="36" width="36" height="40" rx="6" fill="url(#g1)" opacity=".35"/>
+              <rect x="64" y="36" width="36" height="40" rx="6" fill="url(#g1)" opacity=".55"/>
+              <rect x="108" y="36" width="32" height="40" rx="6" fill="url(#g1)" opacity=".2"/>
+            </svg>
+            <h3 class="dcard__title">Разработка сайтов</h3>
+            <p class="dcard__text">Структура под поисковый спрос, формы и аналитика.</p>
+            <a class="dcard__more" href="#contacts" data-topic="Разработка сайтов" draggable="false">Подробнее<span class="sr-only"> о направлении «Разработка сайтов»: перейти к контактам</span></a>
+          </li>
+          <li class="dcard" data-card style="--a1:#a48ff0;--a2:#8fd8bb">
+            <span class="dcard__num">02</span>
+            <svg class="dcard__art" viewBox="0 0 160 96" aria-hidden="true" focusable="false">
+              <defs><linearGradient id="g2" x1="0" y1="1" x2="1" y2="0"><stop offset="0" style="stop-color:var(--a1)"/><stop offset="1" style="stop-color:var(--a2)"/></linearGradient></defs>
+              <rect x="22" y="58" width="14" height="26" rx="4" fill="url(#g2)" opacity=".35"/>
+              <rect x="46" y="46" width="14" height="38" rx="4" fill="url(#g2)" opacity=".5"/>
+              <rect x="70" y="34" width="14" height="50" rx="4" fill="url(#g2)" opacity=".7"/>
+              <rect x="94" y="20" width="14" height="64" rx="4" fill="url(#g2)" opacity=".9"/>
+              <circle cx="128" cy="30" r="14" fill="none" stroke="url(#g2)" stroke-width="1.6"/>
+              <path d="M138 40l10 10" stroke="url(#g2)" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <h3 class="dcard__title">Продвижение сайтов по SEO</h3>
+            <p class="dcard__text">Аудит, семантика, техническая оптимизация, контент и отчётность.</p>
+            <a class="dcard__more" href="#contacts" data-topic="Продвижение сайтов по SEO" draggable="false">Подробнее<span class="sr-only"> о направлении «Продвижение сайтов по SEO»: перейти к контактам</span></a>
+          </li>
+          <li class="dcard" data-card style="--a1:#8fd8bb;--a2:#c9bdf5">
+            <span class="dcard__num">03</span>
+            <svg class="dcard__art" viewBox="0 0 160 96" aria-hidden="true" focusable="false">
+              <defs><linearGradient id="g3" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--a1)"/><stop offset="1" style="stop-color:var(--a2)"/></linearGradient></defs>
+              <rect x="18" y="18" width="62" height="62" rx="12" fill="none" stroke="url(#g3)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".8"/>
+              <rect x="74" y="12" width="68" height="68" rx="14" fill="url(#g3)" opacity=".28"/>
+              <rect x="74" y="12" width="68" height="68" rx="14" fill="none" stroke="url(#g3)" stroke-width="1.5"/>
+              <path d="M40 88c20 6 56 6 78-8" fill="none" stroke="url(#g3)" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M112 74l6 6-8 3" fill="none" stroke="url(#g3)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h3 class="dcard__title">Переработка дизайна и структуры</h3>
+            <p class="dcard__text">Обновление сайта с сохранением поисковых позиций.</p>
+            <a class="dcard__more" href="#contacts" data-topic="Переработка дизайна и структуры" draggable="false">Подробнее<span class="sr-only"> о направлении «Переработка дизайна и структуры»: перейти к контактам</span></a>
+          </li>
+          <li class="dcard" data-card style="--a1:#b4a3f0;--a2:#7fcfb0">
+            <span class="dcard__num">04</span>
+            <svg class="dcard__art" viewBox="0 0 160 96" aria-hidden="true" focusable="false">
+              <defs><linearGradient id="g4" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--a1)"/><stop offset="1" style="stop-color:var(--a2)"/></linearGradient></defs>
+              <path d="M40 48L80 24L120 48L80 72Z M40 48L120 48 M80 24L80 72" fill="none" stroke="url(#g4)" stroke-width="1.2" opacity=".6"/>
+              <circle cx="40" cy="48" r="9" fill="url(#g4)" opacity=".85"/>
+              <circle cx="80" cy="24" r="7" fill="url(#g4)" opacity=".6"/>
+              <circle cx="120" cy="48" r="11" fill="url(#g4)"/>
+              <circle cx="80" cy="72" r="6" fill="url(#g4)" opacity=".45"/>
+              <circle cx="80" cy="48" r="4" fill="url(#g4)"/>
+            </svg>
+            <h3 class="dcard__title">SMM: ручной и на ИИ</h3>
+            <p class="dcard__text">Подготовка и публикация контента по данным клиента.</p>
+            <a class="dcard__more" href="#contacts" data-topic="SMM: ручной и на ИИ" draggable="false">Подробнее<span class="sr-only"> о направлении «SMM: ручной и на ИИ»: перейти к контактам</span></a>
+          </li>
+          <li class="dcard" data-card style="--a1:#8fd8bb;--a2:#a48ff0">
+            <span class="dcard__num">05</span>
+            <svg class="dcard__art" viewBox="0 0 160 96" aria-hidden="true" focusable="false">
+              <defs><linearGradient id="g5" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--a1)"/><stop offset="1" style="stop-color:var(--a2)"/></linearGradient></defs>
+              <rect x="16" y="14" width="78" height="26" rx="13" fill="url(#g5)" opacity=".3"/>
+              <rect x="56" y="48" width="88" height="26" rx="13" fill="url(#g5)" opacity=".75"/>
+              <circle cx="32" cy="27" r="4" fill="url(#g5)"/><circle cx="46" cy="27" r="4" fill="url(#g5)" opacity=".7"/><circle cx="60" cy="27" r="4" fill="url(#g5)" opacity=".45"/>
+              <path d="M70 61h44" stroke="#111213" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+              <circle cx="128" cy="61" r="5" fill="none" stroke="#111213" stroke-width="2" opacity=".55"/>
+              <path d="M128 58v3l2 2" stroke="#111213" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+            </svg>
+            <h3 class="dcard__title">ИИ-ассистент в Telegram</h3>
+            <p class="dcard__text">Задачи, сроки и напоминания.</p>
+            <a class="dcard__more" href="#contacts" data-topic="ИИ-ассистент в Telegram" draggable="false">Подробнее<span class="sr-only"> о направлении «ИИ-ассистент в Telegram»: перейти к контактам</span></a>
+          </li>
+          <li class="dcard" data-card style="--a1:#c9bdf5;--a2:#8fd8bb">
+            <span class="dcard__num">06</span>
+            <svg class="dcard__art" viewBox="0 0 160 96" aria-hidden="true" focusable="false">
+              <defs><linearGradient id="g6" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--a1)"/><stop offset="1" style="stop-color:var(--a2)"/></linearGradient></defs>
+              <rect x="24" y="12" width="112" height="12" rx="6" fill="url(#g6)" opacity=".3"/>
+              <rect x="40" y="30" width="80" height="12" rx="6" fill="url(#g6)" opacity=".5"/>
+              <rect x="56" y="48" width="48" height="12" rx="6" fill="url(#g6)" opacity=".7"/>
+              <rect x="70" y="66" width="20" height="12" rx="6" fill="url(#g6)"/>
+              <circle cx="80" cy="88" r="3" fill="url(#g6)"/>
+            </svg>
+            <h3 class="dcard__title">Конверсии и интернет-коммерция</h3>
+            <p class="dcard__text">Формы, CRM, рассылки и воронка.</p>
+            <a class="dcard__more" href="#contacts" data-topic="Конверсии и интернет-коммерция" draggable="false">Подробнее<span class="sr-only"> о направлении «Конверсии и интернет-коммерция»: перейти к контактам</span></a>
+          </li>
+          <li class="dcard" data-card style="--a1:#8fd8bb;--a2:#b4a3f0">
+            <span class="dcard__num">07</span>
+            <svg class="dcard__art" viewBox="0 0 160 96" aria-hidden="true" focusable="false">
+              <defs><linearGradient id="g7" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--a1)"/><stop offset="1" style="stop-color:var(--a2)"/></linearGradient></defs>
+              <path d="M8 48c14-22 28-22 42 0s28 22 42 0 28-22 42 0 14 11 20 6" fill="none" stroke="url(#g7)" stroke-width="2" stroke-linecap="round"/>
+              <path d="M8 64c14-12 28-12 42 0s28 12 42 0 28-12 42 0 14 6 20 3" fill="none" stroke="url(#g7)" stroke-width="1.4" stroke-linecap="round" opacity=".5"/>
+              <path d="M8 32c14-8 28-8 42 0s28 8 42 0 28-8 42 0 14 4 20 2" fill="none" stroke="url(#g7)" stroke-width="1" stroke-linecap="round" opacity=".3"/>
+              <circle cx="92" cy="48" r="5" fill="url(#g7)"/>
+            </svg>
+            <h3 class="dcard__title">Работа с поведенческими факторами</h3>
+            <p class="dcard__text">Точечная работа с обязательным обсуждением рисков.</p>
+            <a class="dcard__more" href="#contacts" data-topic="Работа с поведенческими факторами" draggable="false">Подробнее<span class="sr-only"> о направлении «Работа с поведенческими факторами»: перейти к контактам</span></a>
+          </li>
+          <li class="dcard" data-card style="--a1:#a48ff0;--a2:#8fd8bb">
+            <span class="dcard__num">08</span>
+            <svg class="dcard__art" viewBox="0 0 160 96" aria-hidden="true" focusable="false">
+              <defs><linearGradient id="g8" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--a1)"/><stop offset="1" style="stop-color:var(--a2)"/></linearGradient></defs>
+              <rect x="14" y="14" width="58" height="30" rx="7" fill="url(#g8)" opacity=".35"/>
+              <rect x="14" y="52" width="58" height="30" rx="7" fill="url(#g8)" opacity=".6"/>
+              <circle cx="114" cy="48" r="28" fill="none" stroke="url(#g8)" stroke-width="2" opacity=".3"/>
+              <path d="M114 20a28 28 0 0 1 26.6 36.6" fill="none" stroke="url(#g8)" stroke-width="5" stroke-linecap="round"/>
+              <circle cx="114" cy="48" r="6" fill="url(#g8)"/>
+              <path d="M22 72l10-8 8 4 14-12 10 6" fill="none" stroke="#111213" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>
+            </svg>
+            <h3 class="dcard__title">ИИ в операционной деятельности</h3>
+            <p class="dcard__text">Отчёты, контроль качества и дашборды.</p>
+            <a class="dcard__more" href="#contacts" data-topic="ИИ в операционной деятельности" draggable="false">Подробнее<span class="sr-only"> о направлении «ИИ в операционной деятельности»: перейти к контактам</span></a>
+          </li>
+          <li class="dcard" data-card style="--a1:#b4a3f0;--a2:#c9f0de">
+            <span class="dcard__num">09</span>
+            <svg class="dcard__art" viewBox="0 0 160 96" aria-hidden="true" focusable="false">
+              <defs><linearGradient id="g9" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--a1)"/><stop offset="1" style="stop-color:var(--a2)"/></linearGradient></defs>
+              <path d="M20 22h64a10 10 0 0 1 10 10v14a10 10 0 0 1-10 10H44l-12 10V56h-12a10 10 0 0 1-10-10V32a10 10 0 0 1 10-10z" fill="url(#g9)" opacity=".35"/>
+              <path d="M76 44h54a10 10 0 0 1 10 10v12a10 10 0 0 1-10 10h-8v10l-12-10H76a10 10 0 0 1-10-10V54a10 10 0 0 1 10-10z" fill="none" stroke="url(#g9)" stroke-width="1.6"/>
+              <path d="M128 14l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="url(#g9)"/>
+            </svg>
+            <h3 class="dcard__title">ИИ в работе с клиентами</h3>
+            <p class="dcard__text">Ответы по каталогу и передача сложных вопросов менеджеру.</p>
+            <a class="dcard__more" href="#contacts" data-topic="ИИ в работе с клиентами" draggable="false">Подробнее<span class="sr-only"> о направлении «ИИ в работе с клиентами»: перейти к контактам</span></a>
+          </li>
+        </ul>
+        <div class="carousel__controls" data-carousel-controls hidden>
+          <button class="icon-btn" type="button" data-carousel-prev aria-controls="directions-list" aria-label="Предыдущее направление">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="dots" data-carousel-dots role="group" aria-label="Выбор направления"></div>
+          <button class="icon-btn" type="button" data-carousel-next aria-controls="directions-list" aria-label="Следующее направление">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <p class="sr-only" aria-live="polite" aria-atomic="true" data-carousel-live></p>
+      </div>
+    </section>
+
+    <!-- 5. Бегущая строка CMS -->
+    <section id="cms" class="cms" aria-labelledby="cms-title" data-marquee>
+      <div class="cms__inner">
+        <h2 id="cms-title" class="cms__label">Ваша CMS. <span>Наш опыт.</span></h2>
+        <div class="cms__viewport">
+          <div class="cms__track" data-marquee-track>
+            <ul class="cms__list">
+              <li>WordPress</li>
+              <li>1С-Битрикс</li>
+              <li>Tilda</li>
+              <li>OpenCart</li>
+              <li>MODX</li>
+              <li>Joomla</li>
+              <li>Drupal</li>
+              <li>Shopify</li>
+              <li>Astro / Next.js</li>
+              <li>Самописные CMS</li>
+            </ul>
+          </div>
+        </div>
+        <button class="icon-btn icon-btn--sm cms__toggle" type="button" data-marquee-toggle aria-pressed="false" aria-label="Пауза бегущей строки" hidden>
+          <svg class="i-pause" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg class="i-play" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M8 6l10 6-10 6z" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- 6. Ниши и задачи в планшете -->
+    <section id="niches" class="section niches" aria-labelledby="niches-title">
+      <div class="container niches__grid">
+        <div class="niches__intro" data-reveal>
+          <h2 id="niches-title" class="h2">Разные ниши.<br><span class="h2__soft">Погружаемся в каждую.</span></h2>
+          <p class="lead">У каждого бизнеса — свои запросы, цикл сделки и требования к контенту. Учитываем это с первого дня.</p>
+          <a class="btn btn--primary" href="#contacts">Обсудить вашу задачу</a>
+        </div>
+        <div class="niches__device" data-niches role="region" aria-roledescription="карусель" aria-label="Ниши и задачи" data-reveal>
+          <div class="tablet">
+            <div class="tablet__screen">
+              <div class="tui">
+                <div class="tui__bar" aria-hidden="true">
+                  <span class="tui__dots"><i></i><i></i><i></i></span>
+                  <span class="tui__app">Ниши и задачи</span>
+                  <span class="tui__count" data-niche-count>01 / 06</span>
+                </div>
+                <div class="tui__slides">
+                  <article class="tui__slide" data-niche aria-roledescription="слайд" aria-label="Ниша 1 из 6">
+                    <p class="tui__kicker">Ниша 01</p>
+                    <h3 class="tui__title">Промышленный B2B</h3>
+                    <p class="tui__text">Сложное оборудование, техническое предложение, длинный цикл сделки.</p>
+                    <p class="tui__label">Основные задачи</p>
+                    <ul class="tui__tasks"><li>Понятно описать сложное оборудование</li><li>Вести к запросу технического предложения</li></ul>
+                  </article>
+                  <article class="tui__slide" data-niche aria-roledescription="слайд" aria-label="Ниша 2 из 6">
+                    <p class="tui__kicker">Ниша 02</p>
+                    <h3 class="tui__title">Металлообработка и производство</h3>
+                    <p class="tui__text">Каталоги, таблицы характеристик, точные описания продукции.</p>
+                    <p class="tui__label">Основные задачи</p>
+                    <ul class="tui__tasks"><li>Структурировать каталог продукции</li><li>Собрать точные таблицы характеристик</li></ul>
+                  </article>
+                  <article class="tui__slide" data-niche aria-roledescription="слайд" aria-label="Ниша 3 из 6">
+                    <p class="tui__kicker">Ниша 03</p>
+                    <h3 class="tui__title">Теплотехника и инженерия</h3>
+                    <p class="tui__text">Профессиональная семантика и качество целевых обращений.</p>
+                    <p class="tui__label">Основные задачи</p>
+                    <ul class="tui__tasks"><li>Собрать профессиональную семантику</li><li>Работать на качество целевых обращений</li></ul>
+                  </article>
+                  <article class="tui__slide" data-niche aria-roledescription="слайд" aria-label="Ниша 4 из 6">
+                    <p class="tui__kicker">Ниша 04</p>
+                    <h3 class="tui__title">Юридические услуги</h3>
+                    <p class="tui__text">Экспертность контента, доверие и техническое SEO.</p>
+                    <p class="tui__label">Основные задачи</p>
+                    <ul class="tui__tasks"><li>Показать экспертность в контенте</li><li>Навести порядок в техническом SEO</li></ul>
+                  </article>
+                  <article class="tui__slide" data-niche aria-roledescription="слайд" aria-label="Ниша 5 из 6">
+                    <p class="tui__kicker">Ниша 05</p>
+                    <h3 class="tui__title">B2B-услуги</h3>
+                    <p class="tui__text">Корпоративный спрос и понятный путь к обращению.</p>
+                    <p class="tui__label">Основные задачи</p>
+                    <ul class="tui__tasks"><li>Ответить на корпоративный спрос</li><li>Выстроить понятный путь к обращению</li></ul>
+                  </article>
+                  <article class="tui__slide" data-niche aria-roledescription="слайд" aria-label="Ниша 6 из 6">
+                    <p class="tui__kicker">Ниша 06</p>
+                    <h3 class="tui__title">SaaS и онлайн-сервисы</h3>
+                    <p class="tui__text">Контентное SEO и длинный путь к использованию продукта.</p>
+                    <p class="tui__label">Основные задачи</p>
+                    <ul class="tui__tasks"><li>Развивать контентное SEO</li><li>Сопровождать путь к использованию продукта</li></ul>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="niches__controls" data-niche-controls hidden>
+            <div class="dots" data-niche-dots role="group" aria-label="Выбор ниши"></div>
+            <div class="niches__buttons">
+              <button class="icon-btn" type="button" data-niche-prev aria-label="Предыдущая ниша">
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <button class="icon-btn" type="button" data-niche-toggle aria-pressed="false" aria-label="Пауза автосмены ниш">
+                <svg class="i-pause" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <svg class="i-play" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M8 6l10 6-10 6z" fill="currentColor"/></svg>
+              </button>
+              <button class="icon-btn" type="button" data-niche-next aria-label="Следующая ниша">
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+          <p class="sr-only" aria-live="polite" aria-atomic="true" data-niche-live></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. От запроса до готовой страницы -->
+    <section id="process" class="section process" aria-labelledby="process-title">
+      <div class="container">
+        <h2 id="process-title" class="h2 h2--center" data-reveal>От запроса<br><span class="h2__soft">до готовой страницы.</span></h2>
+        <div class="steps" data-process data-reveal>
+          <div class="steps__rail" aria-hidden="true"><span class="steps__line"></span><span class="steps__dot" data-process-dot></span></div>
+          <ol class="steps__list">
+            <li class="step" data-step>
+              <span class="step__num">01</span>
+              <h3 class="step__title">Исследование</h3>
+              <p class="step__text">Изучаем спрос, вопросы клиентов, конкурентов и данные бизнеса.</p>
+            </li>
+            <li class="step" data-step>
+              <span class="step__num">02</span>
+              <h3 class="step__title">Подготовка</h3>
+              <p class="step__text">Создаём страницу по согласованному образцу и проверенным данным.</p>
+            </li>
+            <li class="step" data-step>
+              <span class="step__num">03</span>
+              <h3 class="step__title">Проверка</h3>
+              <p class="step__text">Проверяем структуру, таблицы, FAQ и точность информации.</p>
+            </li>
+            <li class="step" data-step>
+              <span class="step__num">04</span>
+              <h3 class="step__title">Публикация</h3>
+              <p class="step__text">Размещаем страницу в CMS с возможностью откатить изменения.</p>
+            </li>
+            <li class="step" data-step>
+              <span class="step__num">05</span>
+              <h3 class="step__title">Контроль качества</h3>
+              <p class="step__text">Оцениваем готовую страницу и исправляем недочёты.</p>
+            </li>
+          </ol>
+          <div class="steps__controls" data-process-controls hidden>
+            <button class="btn btn--ghost btn--sm" type="button" data-process-toggle aria-pressed="false">
+              <svg class="i-pause" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <svg class="i-play" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M8 6l10 6-10 6z" fill="currentColor"/></svg>
+              <span>Пауза</span>
+            </button>
+            <p class="steps__hint">Нажмите на этап, чтобы остановиться на нём.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. О специалисте -->
+    <section id="about" class="section about" aria-labelledby="about-title">
+      <div class="container about__inner">
+        <h2 id="about-title" class="h2 h2--caps" data-reveal>ДИЗАЙН СО СМЫСЛОМ.</h2>
+        <div class="about__text" data-reveal>
+          <p class="about__lead">Я — Владислав Якобсон. Соединяю визуальную идею, логику сайта и технологии в один работающий проект.</p>
+          <p>Можно прийти с новой идеей или с сайтом, который пора изменить. Сначала разберём задачу, затем выберем решение.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. Контакты -->
+    <section id="contacts" class="section contacts" aria-labelledby="contacts-title">
+      <div class="container contacts__inner">
+        <div class="contacts__card" data-reveal>
+          <h2 id="contacts-title" class="h2 h2--caps h2--xl">ЕСТЬ ИДЕЯ?<br><span class="h2__soft">ДАВАЙТЕ ОБСУДИМ.</span></h2>
+          <p class="lead">Пары предложений достаточно, чтобы начать разговор.</p>
+          <p class="contacts__topic" data-topic-note hidden>
+            <span data-topic-text></span>
+            <button class="contacts__topic-reset" type="button" data-topic-reset aria-label="Сбросить выбранное направление">
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M7 7l10 10M17 7L7 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </button>
+          </p>
+          <div class="contacts__actions">
+            <a class="btn btn--primary btn--lg" href="https://t.me/yakobsonv" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M21 4L3 11l6 2.2M21 4l-3.5 16-8.5-6.8M21 4L9 13.2V19l3-3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Написать в Telegram<span class="sr-only"> (откроется в новой вкладке)</span>
+            </a>
+            <a class="btn btn--ghost btn--lg" href="mailto:yakobsonv@icloud.com" data-mail>yakobsonv@icloud.com</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 10. Подвал -->
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <a class="logo" href="#top" aria-label="YAKOBSON V. — на первый экран">YAKOBSON V.</a>
+      <p class="site-footer__text">Владислав Якобсон · Сайты, SEO и автоматизация</p>
+      <a class="site-footer__up" href="#top">Наверх
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M12 19V5m0 0-6 6m6-6 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </footer>
+
+  <!-- Полноэкранная навигация -->
+  <dialog id="site-menu" class="menu" aria-label="Меню">
+    <div class="menu__inner">
+      <div class="menu__top">
+        <span class="logo" aria-hidden="true">YAKOBSON V.</span>
+        <button class="menu-close" type="button" data-menu-close aria-label="Закрыть меню">
+          <span>Закрыть</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <nav class="menu__nav" aria-label="Разделы страницы">
+        <ol class="menu__list">
+          <li><a href="#directions"><span class="menu__num" aria-hidden="true">01</span>Направления</a></li>
+          <li><a href="#niches"><span class="menu__num" aria-hidden="true">02</span>Ниши</a></li>
+          <li><a href="#process"><span class="menu__num" aria-hidden="true">03</span>Подход</a></li>
+          <li><a href="#contacts"><span class="menu__num" aria-hidden="true">04</span>Контакты</a></li>
+        </ol>
+      </nav>
+      <div class="menu__foot">
+        <a href="https://t.me/yakobsonv" target="_blank" rel="noopener noreferrer">Telegram<span class="sr-only"> (откроется в новой вкладке)</span></a>
+        <a href="mailto:yakobsonv@icloud.com">yakobsonv@icloud.com</a>
+      </div>
+    </div>
+  </dialog>
+</body>
+</html>
