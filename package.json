@@ -1,0 +1,12 @@
+{
+  "name": "yakobsonv-onepage",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Одностраничный сайт Владислава Якобсона: статический HTML, CSS и ES-модули без сборки и зависимостей",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "contrast": "node scripts/contrast.mjs",
+    "screenshots": "node scripts/screenshots.mjs screenshots"
+  }
+}

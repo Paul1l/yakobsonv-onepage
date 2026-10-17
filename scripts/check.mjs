@@ -89,6 +89,12 @@ try {
   console.log('\n[ширины]');
   for (const width of [320, 375, 390, 768, 1024, 1280, 1440, 1920]) {
     await open(width, width <= 768 ? 844 : 900);
+    if (width === 390 || width === 1440) {
+      await sleep(1200);
+      const cls = await p.eval(`new Promise((done) => { let sum = 0; new PerformanceObserver((list) => { for (const e of list.getEntries()) if (!e.hadRecentInput) sum += e.value; }).observe({ type: 'layout-shift', buffered: true }); setTimeout(() => done(sum), 100); })`);
+      const fonts = await p.eval(`[...document.fonts].filter((f) => f.status === 'loaded').map((f) => f.family).join(',')`);
+      check(`${width}px: CLS при загрузке < 0.1, Inter загружен`, cls < 0.1 && /Inter/.test(fonts), `CLS ${cls.toFixed(4)}; загружены: ${fonts}`);
+    }
     await scrollThrough();
     const m = await J(`
       const de = document.documentElement;
@@ -251,6 +257,7 @@ try {
   let b = await mq();
   check('строка движется непрерывно (CSS-анимация, дубль aria-hidden)', a.name === 'cms-marquee' && b.x < a.x && a.clones === 1, `сдвиг за 0.5 с: ${(a.x - b.x).toFixed(1)} px, длительность цикла ${a.duration}, дублей aria-hidden: ${a.clones}`);
   await p.eval(`document.querySelector('[data-marquee-toggle]').click()`);
+  await sleep(150); // пауза применяется со следующего кадра
   a = await mq();
   await sleep(600);
   b = await mq();
@@ -414,6 +421,8 @@ try {
     check(`${w}px: ракурс ноутбука меняется при прокрутке`, a.rx !== b.rx && Math.abs(parseFloat(a.rx) - parseFloat(b.rx)) > 2, `rotateX ${a.rx} → ${b.rx}, rotateY ${a.ry} → ${b.ry}`);
     check(`${w}px: экран читаем — кегль ≥ ${minAllowed} px, содержимое в экране, «Демонстрационные данные» видно`, b.minFont >= minAllowed && b.fits && b.badge, `мин. кегль ${b.minFont}px, плашка ${b.badgeFont}, ширина ноутбука ${b.width}px`);
     if (w === 1440) check('ширина ноутбука ≤ 620 px', b.width <= 620, `${b.width}px`);
+    const sec = await J(`return { h: Math.round(document.getElementById('overview').getBoundingClientRect().height), vh: innerHeight };`);
+    check(`${w}px: раздел с ноутбуком не длиннее ~1 экрана`, sec.h <= sec.vh * 1.2, `высота раздела ${sec.h}px при экране ${sec.vh}px`);
     collectConsole(`ноутбук ${w}`);
   }
   await open(1440, 900, { reduced: true });
