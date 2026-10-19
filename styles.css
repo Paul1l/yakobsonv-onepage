@@ -605,8 +605,10 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
 }
 .menu__list a:hover { color: var(--accent); transform: translateX(8px); }
 .menu__num {
+  flex: none;
   font-size: 13px;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;   /* «01» и «02» одной ширины — пункты начинаются с одной линии */
   letter-spacing: 0;
   color: var(--muted);
   transform: translateY(-0.4em);
@@ -678,6 +680,7 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
   color: var(--muted);
   font-size: clamp(1rem, 0.9rem + 0.55vw, 1.3125rem);
   line-height: 1.55;
+  text-wrap: balance;   /* на телефоне без «висящего» «логикой.» на отдельной строке */
 }
 .hero__actions {
   display: flex;
@@ -757,9 +760,14 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
   background: var(--hw-cam);
   box-shadow: 0 0 0 1px var(--hw-cam-ring);
 }
+/* Экран держит пропорцию строго: интерфейс лежит поверх (position: absolute) и не может
+   растянуть экран в «вертикальный планшет». Если текст всё же не влез (узкий телефон,
+   увеличенный шрифт) — он прокручивается внутри экрана, а не ломает силуэт ноутбука. */
 .laptop__screen {
+  position: relative;
   container-type: inline-size;
   aspect-ratio: 16 / 10;
+  overflow: hidden;
   border-radius: 8px;
   background:
     radial-gradient(70% 60% at 100% 0%, var(--screen-glow-a), transparent 70%),
@@ -769,7 +777,6 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
   color: var(--screen-text);
 }
 .laptop__base { position: relative; margin-inline: -7%; }
-@media (max-width: 559px) { .laptop__base { margin-inline: -4%; } }
 .laptop__deck {
   display: block;
   height: calc(4px + 14px * var(--deck));
@@ -814,13 +821,22 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
 
 /* Интерфейс на экране ноутбука — минимальный кегль 11 px */
 .dash {
-  display: grid;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   padding: 14px 16px 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
   font-size: 12px;
   line-height: 1.35;
   font-variant-numeric: tabular-nums;
 }
+/* блоки не сжимаются по высоте; свободное место уходит над нижней строкой — она прижата к низу экрана */
+.dash > * { flex: none; }
+.dash__foot { margin-top: auto; }
 .dash__top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 10px; }
 .dash__title { font-size: 12px; font-weight: 600; }
 .dash__period { color: var(--screen-muted); font-weight: 400; }
@@ -834,7 +850,8 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
   font-weight: 600;
   letter-spacing: 0.01em;
 }
-.dash__kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+/* первая колонка чуть шире: «Органический трафик» в одну строку, значения всех карточек на одной линии */
+.dash__kpis { display: grid; grid-template-columns: minmax(0, 1.15fr) repeat(3, minmax(0, 1fr)); gap: 8px; }
 .kpi {
   display: flex;
   flex-direction: column;
@@ -868,10 +885,79 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
 .dash__foot dt { display: inline; }
 .dash__foot dd { display: inline; margin-left: 6px; color: var(--screen-text); font-weight: 600; }
 
-@container (max-width: 470px) {
-  .dash { padding: 12px; gap: 10px; }
-  .dash__kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .kpi__value { font-size: 20px; }
+/* Компактный экран (телефон, узкий планшет): ничего не убираем, а перекладываем.
+   Показатели — одной лентой с горизонтальным свайпом (видны 2 карточки и край третьей),
+   в карточке «значение + динамика» в одну строку; таблица без переносов; весь текст ≥ 11 px.
+   Горизонтальная лента не спорит с вертикальной прокруткой страницы, в отличие от
+   вертикального скролла внутри экрана. */
+@container (max-width: 575px) {
+  .dash { --dash-px: 10px; gap: 6px; padding: 7px var(--dash-px); font-size: 11px; line-height: 1.2; }
+  .dash__top { flex-wrap: nowrap; align-items: flex-start; gap: 8px; }
+  .dash__title { flex: 1 1 auto; min-width: 0; font-size: 11px; }
+  .dash__badge { flex: none; padding: 1px 7px; letter-spacing: 0; }
+  .dash__kpis {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 144px;
+    gap: 5px;
+    margin-inline: calc(-1 * var(--dash-px));
+    padding-inline: var(--dash-px);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--dash-px);
+    scrollbar-width: none;
+  }
+  .dash__kpis::-webkit-scrollbar { display: none; }
+  .kpi {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: 'label label' 'value delta' 'unit unit';
+    align-items: baseline;
+    gap: 0 6px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    scroll-snap-align: start;
+  }
+  .kpi__label { grid-area: label; }
+  .kpi__value { grid-area: value; font-size: 15px; }
+  .kpi__delta { grid-area: delta; justify-self: end; margin-top: 0; white-space: nowrap; }
+  .kpi__unit { grid-area: unit; }
+  .dash__table-wrap { padding: 3px 8px 1px; border-radius: 8px; }
+  .dash__table { font-size: 11px; }
+  .dash__table caption { padding-bottom: 2px; }
+  .dash__table th,
+  .dash__table td { padding: 2px 4px; white-space: nowrap; }
+  .dash__foot { gap: 2px 12px; }
+  .dash__foot dd { margin-left: 5px; }
+}
+/* Телефон: таблица без подложки — экономим высоту, чтобы всё помещалось без прокрутки */
+@container (max-width: 439px) {
+  .dash__table-wrap { padding: 0; border: 0; border-radius: 0; background: none; }
+  .dash__table tr > :first-child { padding-left: 0; }
+  .dash__table tr > :last-child { padding-right: 0; }
+}
+/* Широкий компактный экран (≈ 480–675 px окна): места по высоте больше — даём воздух */
+@container (min-width: 440px) and (max-width: 575px) {
+  .dash { --dash-px: 12px; gap: 9px; padding-block: 10px; }
+  .kpi { padding: 8px 9px; }
+  .kpi__value { font-size: 17px; }
+  .dash__table-wrap { padding: 4px 8px 2px; }
+  .dash__table th,
+  .dash__table td { padding-block: 4px; }
+}
+
+/* Телефон: экран шире за счёт отступов и тонкой рамки, пропорция 3:2 (как у 13" ноутбуков
+   Surface/Framework; MacBook Air — 1.54), основание тоньше — силуэт ноутбука сохраняется */
+@media (max-width: 559px) {
+  .laptop-stage { padding-inline: 12px; }
+  .laptop__lid { padding: 10px 8px 9px; border-radius: 14px 14px 6px 6px; }
+  .laptop__cam { top: 3px; width: 4px; height: 4px; margin-left: -2px; }
+  .laptop__screen { aspect-ratio: 3 / 2; border-radius: 5px; }
+  .laptop__base { margin-inline: -3%; }
+  .laptop__deck { height: calc(3px + 9px * var(--deck)); }
+  .laptop__lip { height: 7px; border-radius: 0 0 12px 12px; }
+  .laptop__notch { height: 3px; }
 }
 
 /* ---------- 4. Карусель направлений ---------- */
@@ -990,10 +1076,18 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
   margin-top: 24px;
   padding-inline: var(--gutter);
 }
+/* Телефон: девять индикаторов в одну строку. Ряд выходит за поля на всю ширину окна,
+   каждая точка делит её поровну (до 48 px) и получает высоту 48 px: зона нажатия
+   ≈ 43×48 при 390 px вместо 39×44, а видимая точка остаётся прежней — 8 px. */
 @media (max-width: 559px) {
   .carousel__controls { flex-wrap: wrap; gap: 4px 16px; }
-  .carousel__controls .dots { order: -1; flex: 1 0 100%; flex-wrap: nowrap; }
-  .carousel__controls .dot { width: min(44px, (100vw - 2 * var(--gutter)) / 9); }
+  .carousel__controls .dots {
+    order: -1;
+    flex: 1 0 100%;
+    flex-wrap: nowrap;
+    margin-inline: calc(-1 * var(--gutter));
+  }
+  .carousel__controls .dot { flex: 1 1 0; width: auto; min-width: 0; max-width: 48px; height: 48px; }
 }
 
 /* ---------- 5. Бегущая строка CMS ---------- */
@@ -1156,9 +1250,12 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
 @media (min-width: 900px) {
   .niches__grid { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); }
 }
+/* Телефон: ландшафтный 4:3 на узкой колонке раздувался в «квадрат» под текст.
+   Здесь планшет честно стоит вертикально — портретные 3:4, ширина как у реального
+   устройства в руке; содержимое ниши помещается с запасом. */
 @media (max-width: 559px) {
-  .tablet { padding: 10px; border-radius: 28px; transform: rotateY(-7deg) rotateX(4deg); }
-  .tablet__screen { border-radius: 20px; }
+  .tablet { width: min(100%, 320px); padding: 10px; border-radius: 28px; transform: rotateY(-7deg) rotateX(4deg); }
+  .tablet__screen { aspect-ratio: 3 / 4; border-radius: 20px; }
   .tui { padding: 12px; }
   .tui__slide { padding: 14px; }
 }
@@ -1330,7 +1427,7 @@ button.step__num { cursor: pointer; }
   align-items: center;
   gap: 8px;
   min-height: 44px;
-  padding: 0 4px;
+  padding: 0;   /* на телефоне «Наверх» встаёт на одну линию с логотипом и подписью */
   color: var(--text);
   font-size: 14px;
   font-weight: 600;

@@ -446,13 +446,15 @@ async function suite(theme) {
 
   // ---------- 7. Ноутбук ----------
   console.log('\n[ноутбук]');
-  const lp = () => J(`const d = document.querySelector('.laptop'); const cs = getComputedStyle(d); const scr = d.querySelector('.laptop__screen'); const sr = scr.getBoundingClientRect(); const dash = d.querySelector('.dash').getBoundingClientRect();
+  const lp = () => J(`const d = document.querySelector('.laptop'); const cs = getComputedStyle(d); const scr = d.querySelector('.laptop__screen'); const sr = scr.getBoundingClientRect(); const dashEl = d.querySelector('.dash');
     const texts = [...scr.querySelectorAll('*')].filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()));
     const minFont = Math.min(...texts.map((el) => parseFloat(getComputedStyle(el).fontSize)));
     const badge = [...scr.querySelectorAll('*')].find((el) => el.textContent.trim() === 'Демонстрационные данные'); const br = badge.getBoundingClientRect();
     return { rx: cs.getPropertyValue('--rx').trim(), ry: cs.getPropertyValue('--ry').trim(), transform: cs.transform.slice(0, 30), width: d.offsetWidth, minFont,
-      badge: badge.checkVisibility({ opacityProperty: true, visibilityProperty: true }) && br.top >= sr.top && br.bottom <= sr.bottom, badgeFont: getComputedStyle(badge).fontSize, fits: dash.bottom <= sr.bottom + 1 };`);
-  for (const [w, h, minAllowed] of [[1440, 900, 11], [390, 844, 10]]) {
+      badge: badge.checkVisibility({ opacityProperty: true, visibilityProperty: true }) && br.top >= sr.top && br.bottom <= sr.bottom, badgeFont: getComputedStyle(badge).fontSize,
+      // .dash лежит поверх экрана (inset: 0), поэтому «влезает» = нет внутренней вертикальной прокрутки
+      fits: dashEl.scrollHeight <= dashEl.clientHeight + 1, overflowPx: dashEl.scrollHeight - dashEl.clientHeight, ratio: +(scr.offsetWidth / scr.offsetHeight).toFixed(2) };`);
+  for (const [w, h, minAllowed] of [[1440, 900, 11], [390, 844, 11], [375, 812, 11]]) {
     await open(w, h);
     await p.eval(`const s = document.querySelector('[data-laptop]'); window.scrollTo(0, s.getBoundingClientRect().top + scrollY - innerHeight * 0.85)`);
     await sleep(300);
@@ -460,7 +462,7 @@ async function suite(theme) {
     await center('[data-laptop]');
     b = await lp();
     check(`${w}px: ракурс ноутбука меняется при прокрутке`, a.rx !== b.rx && Math.abs(parseFloat(a.rx) - parseFloat(b.rx)) > 2, `rotateX ${a.rx} → ${b.rx}, rotateY ${a.ry} → ${b.ry}`);
-    check(`${w}px: экран читаем — кегль ≥ ${minAllowed} px, содержимое в экране, «Демонстрационные данные» видно`, b.minFont >= minAllowed && b.fits && b.badge, `мин. кегль ${b.minFont}px, плашка ${b.badgeFont}, ширина ноутбука ${b.width}px`);
+    check(`${w}px: экран читаем — кегль ≥ ${minAllowed} px, содержимое в экране, «Демонстрационные данные» видно`, b.minFont >= minAllowed && b.fits && b.badge, `мин. кегль ${b.minFont}px, плашка ${b.badgeFont}, ширина ноутбука ${b.width}px, экран ${b.ratio}:1, не влезло ${b.overflowPx}px`);
     if (w === 1440) check('ширина ноутбука ≤ 620 px', b.width <= 620, `${b.width}px`);
     const sec = await J(`return { h: Math.round(document.getElementById('overview').getBoundingClientRect().height), vh: innerHeight };`);
     check(`${w}px: раздел с ноутбуком не длиннее ~1 экрана`, sec.h <= sec.vh * 1.2, `высота раздела ${sec.h}px при экране ${sec.vh}px`);
