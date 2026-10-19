@@ -1,7 +1,9 @@
 // Вкладки превью дашборда (Обзор / Позиции / Трафик / Контент / Задачи) — как на yakobsonv.com.
-// Кнопки вкладок стоят под ноутбуком, панели — на его экране. Шаблон WAI-ARIA Tabs:
-// стрелки ←/→, Home/End переключают и переносят фокус (автоматическая активация), Tab уходит в панель.
-// Без JS вкладки скрыты, а все панели идут на экране подряд (прокрутка внутри экрана) — текст не теряется.
+// Панели — на экране ноутбука; кнопки вкладок в DOM стоят ДО ноутбука, а на экране показаны под ним (CSS order),
+// поэтому порядок Tab по шаблону WAI-ARIA Tabs: вкладка → её панель → дальше по странице.
+// Стрелки ←/→, Home/End переключают и переносят фокус (автоматическая активация).
+// Без JS вкладки скрыты, а все панели идут на экране подряд; область прокрутки сама в порядке Tab
+// (tabindex="0", role="region" в разметке) — её можно листать с клавиатуры. С JS это снимается: фокус получают панели.
 
 export function initDashboard() {
   const tablist = document.querySelector('[data-dash-tabs]');
@@ -10,7 +12,12 @@ export function initDashboard() {
   const tabs = [...tablist.querySelectorAll('[role="tab"]')];
   const panes = tabs.map((tab) => document.getElementById(tab.getAttribute('aria-controls')));
   if (!tabs.length || panes.some((pane) => !pane)) return;
-  const scroller = dash.querySelector('.dash__panes');
+  const scroller = dash.querySelector('[data-dash-scroller]');
+  if (scroller) {
+    scroller.removeAttribute('tabindex');
+    scroller.removeAttribute('role');
+    scroller.removeAttribute('aria-label');
+  }
 
   panes.forEach((pane, i) => {
     pane.setAttribute('role', 'tabpanel');

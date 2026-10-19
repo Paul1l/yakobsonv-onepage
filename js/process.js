@@ -17,7 +17,14 @@ export function initProcess() {
   const steps = [...root.querySelectorAll('[data-step]')];
   const controls = root.querySelector('[data-process-controls]');
   const toggle = root.querySelector('[data-process-toggle]');
+  const toggleLabel = toggle?.querySelector('[data-process-label]');
   if (!rail || !dot || !steps.length || !controls || !toggle) return;
+  // Подпись кнопки меняется вместе с состоянием («Пауза» ↔ «Продолжить»), поэтому aria-pressed не используем:
+  // по WAI-ARIA у кнопки-переключателя с aria-pressed подпись постоянная.
+  const setToggle = (paused) => {
+    toggle.dataset.paused = String(paused);
+    if (toggleLabel) toggleLabel.textContent = paused ? 'Продолжить' : 'Пауза';
+  };
 
   // Номер этапа становится кнопкой выбора
   const buttons = steps.map((step, i) => {
@@ -79,7 +86,7 @@ export function initProcess() {
     if (canRun()) loop.start();
     else loop.stop();
     root.dataset.running = String(loop.running);
-    toggle.setAttribute('aria-pressed', String(userPaused));
+    setToggle(userPaused);
     toggle.hidden = prefersReducedMotion();
   }
 
@@ -137,7 +144,7 @@ export function initProcess() {
     // без автодвижения: точка стоит над первым этапом, выбор — вручную
     select(0);
     userPaused = false;
-    toggle.setAttribute('aria-pressed', 'false');
+    setToggle(false);
   }
   render();
   update();

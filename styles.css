@@ -466,7 +466,10 @@ strong { font-weight: 650; color: var(--text); }
 .icon-btn[aria-pressed='true'],
 .btn[aria-pressed='true'] { border-color: var(--accent); color: var(--accent); }
 .btn .i-play { display: none; }
-.btn[aria-pressed='true'] .i-play { display: block; }
+.btn[aria-pressed='true'] .i-play,
+.btn[data-paused='true'] .i-play { display: block; }
+.btn[data-paused='true'] .i-pause { display: none; }
+.btn[data-paused='true'] { border-color: var(--accent); color: var(--accent); }
 
 /* Индикаторы (общие для карусели и ниш) */
 .dots { display: flex; justify-content: center; flex-wrap: wrap; }
@@ -507,9 +510,9 @@ strong { font-weight: 650; color: var(--text); }
 }
 .site-header__inner {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   height: 100%;
   padding-inline: var(--gutter);
 }
@@ -519,6 +522,7 @@ strong { font-weight: 650; color: var(--text); }
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  min-width: 44px;
   min-height: 44px;
   font-size: 16px;
   font-weight: 650;
@@ -529,6 +533,18 @@ strong { font-weight: 650; color: var(--text); }
 .logo__mark { flex: none; width: 32px; height: 32px; color: var(--accent); transition: transform 0.3s var(--ease); }
 a.logo:hover .logo__mark { transform: scale(1.05); }
 .logo__word { color: var(--text); }
+/* Узкий телефон (< 360 px): в шапке остаётся знак, слово «Yakobson V.» — только для скринридера (имя ссылки) */
+@media (max-width: 359px) {
+  .site-header .logo__word,
+  .menu__top .logo__word {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
 .logo__dot { color: var(--accent); }
 .menu-toggle {
   justify-self: end;
@@ -628,6 +644,7 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
   cursor: pointer;
 }
 .menu-close:hover { border-color: var(--accent); }
+.menu__actions { display: flex; align-items: center; gap: 8px; }
 .menu__nav { flex: 1; display: flex; align-items: center; padding-block: 24px; }
 .menu__body { width: 100%; max-width: var(--container); margin-inline: auto; }
 .menu__section {
@@ -788,7 +805,12 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
 }
 
 /* ---------- 3. Ноутбук ---------- */
-.overview { position: relative; overflow: hidden; }
+.overview { position: relative; overflow: hidden; display: flex; flex-direction: column; }
+/* В DOM вкладки стоят до ноутбука (порядок Tab по WAI-ARIA), на экране — под ним */
+.overview__head { order: 0; }
+.laptop-stage { order: 1; }
+.dash-tabs { order: 2; }
+.overview__note { order: 3; }
 .laptop-stage {
   position: relative;
   display: flex;
@@ -813,7 +835,10 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
   --ry: 0deg;
   --deck: 0.6;
   position: relative;
-  width: min(620px, 100%);
+  /* Ширина ограничена и высотой окна: на низком экране (телефон лёжа, 844×390, 740×360) экран ноутбука и кнопки вкладок
+     помещаются вместе под шапкой. 1.6 = 16:10, 28px — рамка крышки, 128px — низ крышки, основание, отступ, ряд вкладок и запас на наклон при прокрутке. */
+  width: min(620px, 100%, calc((100vh - var(--header-h) - 128px) * 1.6 + 28px));
+  width: min(620px, 100%, calc((100svh - var(--header-h) - 128px) * 1.6 + 28px));
   transform: rotateX(var(--rx)) rotateY(var(--ry));
   transform-origin: 50% 85%;
 }
@@ -982,6 +1007,7 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
+  padding-inline: 2px;   /* текст не касается края обрезки */
   border-radius: 6px;
 }
 .dash__pane { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
@@ -1189,6 +1215,7 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
    Surface/Framework; MacBook Air — 1.54), основание тоньше — силуэт ноутбука сохраняется */
 @media (max-width: 559px) {
   .laptop-stage { padding-inline: 12px; }
+  .laptop { width: min(620px, 100%, calc((100svh - var(--header-h) - 128px) * 1.5 + 16px)); }
   .laptop__lid { padding: 10px 8px 9px; border-radius: 14px 14px 6px 6px; }
   .laptop__cam { top: 3px; width: 4px; height: 4px; margin-left: -2px; }
   .laptop__screen { aspect-ratio: 3 / 2; border-radius: 5px; }
@@ -1456,6 +1483,10 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
 }
 /* Без JS список переносится — подпись CMS может не влезть в строку целиком */
 .cms__band:not(.is-ready) .cms__list li { white-space: normal; }
+@media (max-width: 559px) {
+  .cms__band:not(.is-ready) .cms__inner { flex-wrap: wrap; padding-block: 12px; }
+  .cms__band:not(.is-ready) .cms__label { flex-basis: 100%; padding-right: 0; border-right: 0; }
+}
 
 /* ---------- 6. Ниши в планшете ---------- */
 .niches__grid { display: grid; gap: clamp(40px, 6vw, 72px); align-items: center; }
@@ -1579,7 +1610,8 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
 }
 
 /* ---------- 7. Этапы ---------- */
-.steps { position: relative; margin-top: clamp(40px, 6vw, 72px); }
+.steps { margin-top: clamp(40px, 6vw, 72px); }
+.steps__track { position: relative; }
 .steps__list { display: grid; gap: 12px; padding: 0; list-style: none; }
 .step {
   --glow: 0;
@@ -1657,7 +1689,7 @@ button.step__num { cursor: pointer; }
   will-change: transform;
 }
 .steps:not(.is-ready) .steps__dot { display: none; }
-.steps__controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-top: 24px; }
+.steps__controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-bottom: 20px; }
 .steps__hint { color: var(--muted); font-size: 14px; }
 
 /* Телефон и планшет: карточки вертикально, линия с точкой слева */
@@ -1673,7 +1705,7 @@ button.step__num { cursor: pointer; }
 }
 /* Компьютер: карточки в ряд, пунктир над ними */
 @media (min-width: 1024px) {
-  .steps { padding-top: 40px; }
+  .steps__track { padding-top: 40px; }
   .steps__list { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .steps__rail { top: 12px; left: 0; right: 0; height: 1px; }
   .steps__line {
@@ -1823,6 +1855,10 @@ button.step__num { cursor: pointer; }
   to { opacity: 1; }
 }
 
+@media (prefers-reduced-motion: reduce) and (max-width: 559px) {
+  .cms__band.is-ready .cms__inner { flex-wrap: wrap; padding-block: 12px; }
+  .cms__band.is-ready .cms__label { flex-basis: 100%; padding-right: 0; border-right: 0; }
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1833,6 +1869,7 @@ button.step__num { cursor: pointer; }
   /* Бегущая строка стоит: обычный список с переносом, дубль и пауза не нужны */
   .cms__band.is-ready .cms__track { width: auto; animation: none; }
   .cms__band.is-ready .cms__list { flex-wrap: wrap; }
+  .cms__band.is-ready .cms__list li { white-space: normal; }
   .cms__list.is-clone { display: none; }
   .cms__band.is-ready .cms__viewport { -webkit-mask-image: none; mask-image: none; }
   .cms__toggle { display: none !important; }

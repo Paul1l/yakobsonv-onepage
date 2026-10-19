@@ -146,6 +146,13 @@ async function suite(theme) {
       return { overflow: de.scrollWidth - window.innerWidth, h1: document.querySelectorAll('h1').length, skips, small, first: headings[0] };
     `);
     check(`${width}px: нет горизонтальной прокрутки`, m.overflow <= 0, `scrollWidth − innerWidth = ${m.overflow}`);
+    if (width <= 390) {
+      // шапка position: fixed — scrollWidth страницы её вылет не ловит, меряем отдельно
+      const hd = await J(`const a = document.querySelector('.site-header__actions').getBoundingClientRect(); const l = document.querySelector('.site-header .logo').getBoundingClientRect();
+        return { right: Math.round(a.right), left: Math.round(a.left), logo: Math.round(l.right), vw: innerWidth, pad: parseFloat(getComputedStyle(document.querySelector('.site-header__inner')).paddingRight) };`);
+      check(`${width}px: шапка в окне — «Меню» не заходит за правое поле, логотип не наезжает`, hd.right <= hd.vw - hd.pad + 0.5 && hd.logo <= hd.left,
+        `правый край кнопок ${hd.right} при окне ${hd.vw} и поле ${hd.pad}; логотип до ${hd.logo}, кнопки с ${hd.left}`);
+    }
     if (width === 390 || width === 1440) {
       check(`${width}px: один H1, первый заголовок — H1, уровни без пропусков`, m.h1 === 1 && m.first === 1 && m.skips === 0, `H1: ${m.h1}, пропусков: ${m.skips}`);
     }
@@ -220,6 +227,22 @@ async function suite(theme) {
   await sleep(300);
   s = await J(`return { open: document.getElementById('site-menu').open, back: document.activeElement === document.querySelector('[data-menu-toggle]') };`);
   check('кнопка «Закрыть» закрывает меню и возвращает фокус', !s.open && s.back, JSON.stringify(s));
+  await p.click(...Object.values(await rectOf('[data-menu-toggle]')).slice(0, 2));
+  await sleep(400);
+  const themeBefore = await p.eval('document.documentElement.dataset.theme');
+  r = await rectOf('#site-menu [data-theme-toggle]');
+  await p.click(r.x, r.y);
+  await sleep(150);
+  s = await J(`return { theme: document.documentElement.dataset.theme, stored: localStorage.getItem('${THEME_KEY}'), open: document.getElementById('site-menu').open,
+    pressed: [...document.querySelectorAll('[data-theme-toggle]')].map((b) => b.getAttribute('aria-pressed')) };`);
+  const themeOk = s.theme !== themeBefore && s.stored === s.theme && s.open && s.pressed.length === 2 && s.pressed.every((v) => v === String(s.theme === 'dark'));
+  await p.click(r.x, r.y);
+  await sleep(150);
+  const themeBack = await p.eval('document.documentElement.dataset.theme');
+  check('тему можно переключить в открытом меню; кнопки в меню и в шапке синхронны (aria-pressed), выбор сохранён', themeOk && themeBack === themeBefore,
+    `${themeBefore} → ${s.theme} → ${themeBack}; aria-pressed: ${s.pressed.join('/')}; меню открыто: ${s.open}`);
+  await press('Escape');
+  await sleep(300);
   collectConsole('меню');
 
   // ---------- 3. Карусель ----------
@@ -327,6 +350,14 @@ async function suite(theme) {
   check('reduced-motion: строка стоит, дубль скрыт, кнопки паузы нет, список переносится', a.name === 'none' && a.x === b.x && !a.cloneShown && !a.btn,
     `animation: ${a.name}, дубль виден: ${a.cloneShown}, кнопка видна: ${a.btn}, высота полосы ${Math.round(a.h)} px`);
   collectConsole('строка reduced');
+  for (const w of [320, 390]) {
+    await open(w, 700, { reduced: true });
+    await center('[data-marquee]');
+    const c = await J(`const v = document.querySelector('.cms__viewport').getBoundingClientRect(); const items = [...document.querySelectorAll('.cms__list:not(.is-clone) li')];
+      return { out: items.filter((li) => { const r = li.getBoundingClientRect(); return r.right > v.right + 1 || r.left < v.left - 1 || r.bottom > v.bottom + 1; }).map((li) => li.textContent.trim()), n: items.length, h: Math.round(v.height) };`);
+    check(`reduced-motion ${w}px: все 10 CMS с подписями целиком в полосе (перенос, без обрезки)`, c.out.length === 0 && c.n === 10, `вне полосы: ${c.out.length ? c.out.join(' | ') : 0}; высота полосы ${c.h} px`);
+  }
+  collectConsole('строка reduced узкие');
 
   // ---------- 5. Ниши ----------
   console.log('\n[ниши]');
@@ -386,7 +417,7 @@ async function suite(theme) {
     const glows = steps.map((s) => Number(getComputedStyle(s).getPropertyValue('--glow')));
     const toggle = root.querySelector('[data-process-toggle]');
     return { t: performance.now(), x: m.m41, y: m.m42, len: vertical ? rail.height : rail.width, vertical, centers, glows, running: root.dataset.running,
-      pressed: [...root.querySelectorAll('.step__num')].map((b) => b.getAttribute('aria-pressed')), toggle: toggle.getAttribute('aria-pressed'), toggleShown: toggle.checkVisibility() };`);
+      pressed: [...root.querySelectorAll('.step__num')].map((b) => b.getAttribute('aria-pressed')), toggle: toggle.dataset.paused, label: toggle.textContent.trim(), toggleShown: toggle.checkVisibility() };`);
   await open(1440, 900);
   await center('[data-process]');
   a = await pr();
@@ -409,7 +440,7 @@ async function suite(theme) {
   a = await pr();
   await sleep(1000);
   b = await pr();
-  check('пауза этапов: точка стоит, aria-pressed=true', a.x === b.x && a.toggle === 'true' && a.running === 'false', `сдвиг ${(b.x - a.x).toFixed(2)} px`);
+  check('пауза этапов: точка стоит, кнопка — «Продолжить» (▶)', a.x === b.x && a.toggle === 'true' && a.label === 'Продолжить' && a.running === 'false', `сдвиг ${(b.x - a.x).toFixed(2)} px, подпись «${a.label}»`);
   await p.eval(`document.querySelectorAll('.step__num')[2].click()`);
   await sleep(100);
   a = await pr();
@@ -488,6 +519,29 @@ async function suite(theme) {
 
   // ---------- 7б. Вкладки превью дашборда ----------
   console.log('\n[вкладки дашборда]');
+  await open(1440, 900);
+  await center('[data-laptop]');
+  await p.eval(`document.getElementById('dash-tab-traffic').click(); document.getElementById('dash-tab-traffic').focus(); true`);
+  await press('Tab');
+  const fwd = await J(`const a = document.activeElement; return { id: a.id, role: a.getAttribute('role') };`);
+  await press('Tab', true);
+  const bwd = await p.eval('document.activeElement.id');
+  check('порядок Tab по WAI-ARIA: выбранная вкладка → её панель, Shift+Tab — обратно на вкладку', fwd.role === 'tabpanel' && fwd.id === 'dash-traffic' && bwd === 'dash-tab-traffic',
+    `Tab → ${fwd.id} (${fwd.role}); Shift+Tab → ${bwd}`);
+  for (const [w, h] of [[844, 390], [740, 360], [667, 375], [932, 430]]) {
+    await p.viewport(w, h, { mobile: true });
+    await p.goto(BASE);
+    await sleep(300);
+    await p.eval(`document.querySelector('[data-dash-tabs]').scrollIntoView({ block: 'end', behavior: 'instant' }); document.getElementById('dash-tab-traffic').click(); true`);
+    await sleep(500);
+    const f = await J(`const scr = document.querySelector('.laptop__screen'); const sr = scr.getBoundingClientRect(); const tb = document.querySelector('[data-dash-tabs]').getBoundingClientRect(); const hd = document.querySelector('.site-header').getBoundingClientRect();
+      return { span: Math.round(tb.bottom - sr.top), avail: Math.round(innerHeight - hd.bottom), top: Math.round(sr.top), header: Math.round(hd.bottom), bottom: Math.round(tb.bottom), vh: innerHeight, ratio: +(scr.offsetWidth / scr.offsetHeight).toFixed(2) };`);
+    check(`${w}×${h} (телефон лёжа): экран ноутбука и кнопки вкладок помещаются вместе, после нажатия вкладки экран виден, пропорция 16:10`,
+      // допуск 1 px — округление дробных координат
+      f.span <= f.avail && f.top >= f.header - 1 && f.bottom <= f.vh + 1 && f.ratio === 1.6,
+      `экран+вкладки ${f.span} px из ${f.avail}; экран с ${f.top} (шапка до ${f.header}), вкладки до ${f.bottom} из ${f.vh}; пропорция ${f.ratio}`);
+  }
+  collectConsole('вкладки лёжа');
   const dt = () => J(`const tabs = [...document.querySelectorAll('[data-dash-tabs] [role="tab"]')]; const panes = [...document.querySelectorAll('[data-pane]')]; const sc = document.querySelector('.dash__panes');
     return { shown: document.querySelector('[data-dash-tabs]').checkVisibility(), selected: tabs.map((t) => t.getAttribute('aria-selected')).indexOf('true'), focus: tabs.indexOf(document.activeElement),
       tabindex: tabs.map((t) => t.tabIndex).join(''), visible: panes.filter((x) => !x.hidden).map((x) => x.id), over: sc.scrollHeight - sc.clientHeight,
@@ -552,6 +606,9 @@ async function suite(theme) {
   check('без JS весь текст виден (кроме кнопок управления, которые без JS не работают и скрыты атрибутом hidden)', !s.js && s.hidden.length === 0 && s.missing.length === 0, `текстовых элементов ${s.total}, скрытых ${s.hidden.length}${s.hidden.length ? ': ' + s.hidden.join(' | ') : ''}; нет в тексте: ${s.missing.join(', ') || '—'}`);
   await scrollThrough();
   check('без JS нет горизонтальной прокрутки (1440)', (await p.eval('document.documentElement.scrollWidth - innerWidth')) <= 0);
+  s = await J(`const sc = document.querySelector('[data-dash-scroller]'); return { tabindex: sc.getAttribute('tabindex'), role: sc.getAttribute('role'), label: sc.getAttribute('aria-label'), over: sc.scrollHeight - sc.clientHeight, cms: getComputedStyle(document.querySelector('.cms__list li')).whiteSpace };`);
+  check('без JS: 5 панелей дашборда подряд, область прокрутки в порядке Tab (tabindex=0, role=region с подписью); список CMS переносится',
+    s.tabindex === '0' && s.role === 'region' && !!s.label && s.over > 0 && s.cms === 'normal', JSON.stringify(s));
   await p.viewport(390, 844, { mobile: true });
   await p.goto(BASE);
   check('без JS нет горизонтальной прокрутки (390)', (await p.eval('document.documentElement.scrollWidth - innerWidth')) <= 0);

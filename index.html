@@ -109,6 +109,14 @@
         <h2 id="overview-title" class="h2 h2--center" data-reveal>Живой дашборд проекта</h2>
         <p class="overview__demo" data-reveal><span class="demo-pill">Демо</span> превью реального дашборда проекта — у вас он будет с вашими данными</p>
       </div>
+      <!-- Вкладки в DOM стоят до ноутбука (порядок Tab: вкладка → её панель), на экране — под ним (CSS order) -->
+      <div class="dash-tabs" role="tablist" aria-label="Превью дашборда" data-dash-tabs hidden>
+        <button class="dash-tab" type="button" role="tab" id="dash-tab-overview" aria-controls="dash-overview" aria-selected="true">Обзор</button>
+        <button class="dash-tab" type="button" role="tab" id="dash-tab-rankings" aria-controls="dash-rankings" aria-selected="false" tabindex="-1">Позиции</button>
+        <button class="dash-tab" type="button" role="tab" id="dash-tab-traffic" aria-controls="dash-traffic" aria-selected="false" tabindex="-1">Трафик</button>
+        <button class="dash-tab" type="button" role="tab" id="dash-tab-content" aria-controls="dash-content" aria-selected="false" tabindex="-1">Контент</button>
+        <button class="dash-tab" type="button" role="tab" id="dash-tab-tasks" aria-controls="dash-tasks" aria-selected="false" tabindex="-1">Задачи</button>
+      </div>
       <div class="laptop-stage" data-laptop data-reveal>
         <div class="laptop">
           <div class="laptop__lid">
@@ -120,7 +128,7 @@
                   <p class="dash__path">demo / preview / sample-project</p>
                   <p class="dash__badge"><span class="dash__live" aria-hidden="true"></span>Sample</p>
                 </div>
-                <div class="dash__panes">
+                <div class="dash__panes" role="region" aria-label="Превью дашборда: пять разделов, прокрутка" tabindex="0" data-dash-scroller>
                   <!-- Обзор -->
                   <div class="dash__pane dash__pane--overview" id="dash-overview" data-pane>
                     <dl class="dash__kpis">
@@ -310,13 +318,6 @@
           <div class="laptop__base" aria-hidden="true"><span class="laptop__deck"></span><span class="laptop__lip"><span class="laptop__notch"></span></span></div>
           <div class="laptop__shadow" aria-hidden="true"></div>
         </div>
-      </div>
-      <div class="dash-tabs" role="tablist" aria-label="Превью дашборда" data-dash-tabs hidden>
-        <button class="dash-tab" type="button" role="tab" id="dash-tab-overview" aria-controls="dash-overview" aria-selected="true">Обзор</button>
-        <button class="dash-tab" type="button" role="tab" id="dash-tab-rankings" aria-controls="dash-rankings" aria-selected="false" tabindex="-1">Позиции</button>
-        <button class="dash-tab" type="button" role="tab" id="dash-tab-traffic" aria-controls="dash-traffic" aria-selected="false" tabindex="-1">Трафик</button>
-        <button class="dash-tab" type="button" role="tab" id="dash-tab-content" aria-controls="dash-content" aria-selected="false" tabindex="-1">Контент</button>
-        <button class="dash-tab" type="button" role="tab" id="dash-tab-tasks" aria-controls="dash-tasks" aria-selected="false" tabindex="-1">Задачи</button>
       </div>
       <p class="overview__note" data-reveal>Демонстрационные данные. У вашего проекта будет собственный дашборд с реальными запросами и метриками.</p>
     </section>
@@ -636,46 +637,48 @@
           <p class="lead" data-reveal>Прозрачный процесс с понятными этапами и контролем качества на каждом — от анализа до публикации, с возможностью откатить любую правку. Рутину ускоряет ИИ, а образец задаёт и качество на каждом шаге подтверждает человек. Подробный разбор — в <a class="text-link" href="https://yakobsonv.com/ru/articles/programmatic-seo-pipeline/">статье про процесс</a>.</p>
         </div>
         <div class="steps" data-process data-reveal>
-          <div class="steps__rail" aria-hidden="true"><span class="steps__line"></span><span class="steps__dot" data-process-dot></span></div>
-          <ol class="steps__list">
-            <li class="step" data-step>
-              <span class="step__num">01</span>
-              <h3 class="step__title">Исследование</h3>
-              <p class="step__text">Перед текстом — короткое исследование под каждую страницу: что показывает поиск в топе, какие вопросы реально задают люди по теме, что предлагают конкуренты и какие характеристики уже есть в вашей базе. На выходе — компактный бриф по странице, на основе которого готовится контент.</p>
-              <p class="step__tag">анализ</p>
-            </li>
-            <li class="step" data-step>
-              <span class="step__num">02</span>
-              <h3 class="step__title">Подготовка</h3>
-              <p class="step__text">Готовим страницу по утверждённому образцу, подставляя характеристики прямо из вашей базы. Никаких «в среднем 2–3 кг»: если в базе 2.4 кг — на странице будет ровно 2.4 кг. Цифры на сайте всегда совпадают с вашими данными.</p>
-              <p class="step__tag">контент</p>
-            </li>
-            <li class="step" data-step>
-              <span class="step__num">03</span>
-              <h3 class="step__title">Проверка</h3>
-              <p class="step__text">Каждую страницу проверяем по чек-листу до публикации: на месте ли структура, нужные таблицы и блок вопросов-ответов, корректны ли данные. Так ошибки находятся заранее — дешевле поправить до выхода, чем после.</p>
-              <p class="step__tag">контроль</p>
-            </li>
-            <li class="step" data-step>
-              <span class="step__num">04</span>
-              <h3 class="step__title">Публикация</h3>
-              <p class="step__text">Размещаем готовую страницу прямо в вашей системе управления — Bitrix, WordPress, Tilda и других, — не ломая текущую вёрстку и оформление. Любую правку можно вернуть назад в один шаг, без риска для сайта.</p>
-              <p class="step__tag">в вашей CMS</p>
-            </li>
-            <li class="step" data-step>
-              <span class="step__num">05</span>
-              <h3 class="step__title">Контроль качества</h3>
-              <p class="step__text">Финальную страницу отдельно оценивает независимый специалист — по тем же критериям и в том виде, в котором её увидит посетитель. Публикуется только то, что прошло порог качества; остальное возвращается на доработку с конкретным списком правок.</p>
-              <p class="step__tag">финальная проверка</p>
-            </li>
-          </ol>
           <div class="steps__controls" data-process-controls hidden>
-            <button class="btn btn--ghost btn--sm" type="button" data-process-toggle aria-pressed="false">
+            <button class="btn btn--ghost btn--sm" type="button" data-process-toggle data-paused="false">
               <svg class="i-pause" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               <svg class="i-play" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M8 6l10 6-10 6z" fill="currentColor"/></svg>
-              <span>Пауза</span>
+              <span data-process-label>Пауза</span>
             </button>
             <p class="steps__hint">Нажмите на этап, чтобы остановиться на нём.</p>
+          </div>
+          <div class="steps__track">
+            <div class="steps__rail" aria-hidden="true"><span class="steps__line"></span><span class="steps__dot" data-process-dot></span></div>
+            <ol class="steps__list">
+              <li class="step" data-step>
+                <span class="step__num">01</span>
+                <h3 class="step__title">Исследование</h3>
+                <p class="step__text">Перед текстом — короткое исследование под каждую страницу: что показывает поиск в топе, какие вопросы реально задают люди по теме, что предлагают конкуренты и какие характеристики уже есть в вашей базе. На выходе — компактный бриф по странице, на основе которого готовится контент.</p>
+                <p class="step__tag">анализ</p>
+              </li>
+              <li class="step" data-step>
+                <span class="step__num">02</span>
+                <h3 class="step__title">Подготовка</h3>
+                <p class="step__text">Готовим страницу по утверждённому образцу, подставляя характеристики прямо из вашей базы. Никаких «в среднем 2–3 кг»: если в базе 2.4 кг — на странице будет ровно 2.4 кг. Цифры на сайте всегда совпадают с вашими данными.</p>
+                <p class="step__tag">контент</p>
+              </li>
+              <li class="step" data-step>
+                <span class="step__num">03</span>
+                <h3 class="step__title">Проверка</h3>
+                <p class="step__text">Каждую страницу проверяем по чек-листу до публикации: на месте ли структура, нужные таблицы и блок вопросов-ответов, корректны ли данные. Так ошибки находятся заранее — дешевле поправить до выхода, чем после.</p>
+                <p class="step__tag">контроль</p>
+              </li>
+              <li class="step" data-step>
+                <span class="step__num">04</span>
+                <h3 class="step__title">Публикация</h3>
+                <p class="step__text">Размещаем готовую страницу прямо в вашей системе управления — Bitrix, WordPress, Tilda и других, — не ломая текущую вёрстку и оформление. Любую правку можно вернуть назад в один шаг, без риска для сайта.</p>
+                <p class="step__tag">в вашей CMS</p>
+              </li>
+              <li class="step" data-step>
+                <span class="step__num">05</span>
+                <h3 class="step__title">Контроль качества</h3>
+                <p class="step__text">Финальную страницу отдельно оценивает независимый специалист — по тем же критериям и в том виде, в котором её увидит посетитель. Публикуется только то, что прошло порог качества; остальное возвращается на доработку с конкретным списком правок.</p>
+                <p class="step__tag">финальная проверка</p>
+              </li>
+            </ol>
           </div>
         </div>
         <p class="process__more" data-reveal><a class="link-arrow" href="https://yakobsonv.com/ru/method/">Весь процесс и живой дашборд проекта — на странице «Подход» <span aria-hidden="true">→</span><span class="sr-only"> (yakobsonv.com)</span></a></p>
@@ -798,10 +801,16 @@
           <svg class="logo__mark" focusable="false"><use href="#logo-mark"/></svg>
           <span class="logo__word">Yakobson V<span class="logo__dot">.</span></span>
         </span>
-        <button class="menu-close" type="button" data-menu-close aria-label="Закрыть меню">
-          <span>Закрыть</span>
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        </button>
+        <div class="menu__actions">
+          <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="Тёмная тема">
+            <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+            <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </button>
+          <button class="menu-close" type="button" data-menu-close aria-label="Закрыть меню">
+            <span>Закрыть</span>
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
       </div>
       <nav class="menu__nav" aria-labelledby="menu-nav-label">
         <div class="menu__body">
