@@ -2,6 +2,8 @@
 // Запуск: node scripts/check.mjs            — поднимет свой статический сервер на 127.0.0.1:8052
 //         BASE_URL=http://127.0.0.1:8050/ node scripts/check.mjs — проверить уже запущенный сервер
 // CDP_PORT — порт отладки Chrome (по умолчанию 9681).
+// --theme=light | dark | both (по умолчанию both) — в какой теме прогнать весь набор;
+// переключатель темы проверяется в каждом запуске отдельно.
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
@@ -32,17 +34,24 @@ async function startServer(port) {
   return server;
 }
 
+const THEME_KEY = 'yakobson-onepage-theme';
+const themeArg = (process.argv.find((a) => a.startsWith('--theme=')) || '--theme=both').split('=')[1];
+const THEMES = themeArg === 'both' ? ['light', 'dark'] : [themeArg];
+if (!THEMES.every((t) => t === 'light' || t === 'dark')) throw new Error(`неизвестная тема: ${themeArg}`);
+
 const results = [];
+let prefix = '';
 const check = (name, ok, detail = '') => {
-  results.push({ name, ok: Boolean(ok), detail });
-  console.log(`${ok ? ' ✓' : ' ✗'} ${name}${detail ? ` — ${detail}` : ''}`);
+  const full = prefix + name;
+  results.push({ name: full, ok: Boolean(ok), detail });
+  console.log(`${ok ? ' ✓' : ' ✗'} ${full}${detail ? ` — ${detail}` : ''}`);
 };
 
 const server = process.env.BASE_URL ? null : await startServer(8052);
 const BASE = process.env.BASE_URL || 'http://127.0.0.1:8052/';
 const browser = await launch({ port: Number(process.env.CDP_PORT) || 9681 });
 const p = browser.page;
-const consoleLog = [];
+let consoleLog = [];
 
 const J = async (expr) => JSON.parse(await p.eval(`JSON.stringify((() => { ${expr} })())`));
 async function open(width, height, { mobile = width <= 768, reduced = false } = {}) {
@@ -79,12 +88,40 @@ const KEYS = {
   End: { code: 'End', keyCode: 35 },
 };
 const press = (key, shift = false) => p.key(key, { ...KEYS[key], shift });
+// Контраст по вычисленным цветам: текст против ближайшей непрозрачной подложки (с наложением полупрозрачных слоёв)
+const contrastAudit = () => J(`
+  const parse = (s) => { const m = s.match(/rgba?\\(([^)]+)\\)/); if (!m) return null; const v = m[1].split(/[\\s,\\/]+/).filter(Boolean).map(Number); return [v[0], v[1], v[2], v[3] ?? 1]; };
+  const over = (f, b) => [0, 1, 2].map((k) => f[k] * f[3] + b[k] * (1 - f[3])).concat(1);
+  const lum = (c) => { const ch = (x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; }; return 0.2126 * ch(c[0]) + 0.7152 * ch(c[1]) + 0.0722 * ch(c[2]); };
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+  const bgOf = (el) => { const stack = []; for (let n = el; n; n = n.parentElement) { const c = parse(getComputedStyle(n).backgroundColor); if (c && c[3] > 0) { stack.push(c); if (c[3] >= 1) break; } }
+    let base = [255, 255, 255, 1]; for (let i = stack.length - 1; i >= 0; i--) base = stack[i][3] >= 1 ? stack[i] : over(stack[i], base); return base; };
+  const els = [...document.querySelectorAll('body *')].filter((el) => !el.closest('.sr-only, svg, [aria-hidden="true"], dialog:not([open]), .skip-link')
+    && !(el.classList.contains('hero__line') && el.previousElementSibling)
+    && [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) && el.checkVisibility({ opacityProperty: true, visibilityProperty: true }));
+  const fails = []; let min = 99;
+  for (const el of els) {
+    const cs = getComputedStyle(el); const bg = bgOf(el); const fg0 = parse(cs.color); const fg = fg0[3] < 1 ? over(fg0, bg) : fg0;
+    const r = ratio(fg, bg); const size = parseFloat(cs.fontSize); const large = size >= 24 || (size >= 18.66 && Number(cs.fontWeight) >= 700);
+    min = Math.min(min, r); if (r < (large ? 3 : 4.5)) fails.push(el.textContent.trim().slice(0, 28) + ' ' + r.toFixed(2));
+  }
+  return { count: els.length, min: Number(min.toFixed(2)), fails };
+`);
+
 const setHidden = (hidden) =>
   p.eval(`Object.defineProperty(document, 'hidden', { configurable: true, get: () => ${hidden} });
     Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => '${hidden ? 'hidden' : 'visible'}' });
     document.dispatchEvent(new Event('visibilitychange')); true`);
 
-try {
+async function suite(theme) {
+  prefix = `[${theme}] `;
+  consoleLog = [];
+  console.log(`\n========== Тема: ${theme} ==========`);
+  const themeScript = await p.send('Page.addScriptToEvaluateOnNewDocument', { source: `try { localStorage.setItem('${THEME_KEY}', '${theme}') } catch (e) {}` });
+  await open(1440, 900);
+  const applied = await p.eval('document.documentElement.dataset.theme');
+  check('тема применена', applied === theme, `data-theme=${applied}`);
+
   // ---------- 1. Перелив, заголовки, цели нажатия на всех ширинах ----------
   console.log('\n[ширины]');
   for (const width of [320, 375, 390, 768, 1024, 1280, 1440, 1920]) {
@@ -115,6 +152,10 @@ try {
     const dotsOnly = m.small.every((s) => /^Направление \d из 9/.test(s));
     check(`${width}px: цели нажатия ≥ 44×44`, m.small.length === 0 || dotsOnly,
       m.small.length ? `меньше 44: ${m.small.length} (${dotsOnly ? 'только индикаторы карусели, см. README' : m.small.join('; ')}) ${m.small[0] || ''}` : 'все ≥ 44');
+    if (width === 390 || width === 1440) {
+      const c = await contrastAudit();
+      check(`${width}px: фактический контраст текста (вычисленные стили)`, c.fails.length === 0, `текстовых элементов ${c.count}, минимум ${c.min}:1${c.fails.length ? '; ниже нормы: ' + c.fails.join(' | ') : ''}`);
+    }
     collectConsole(`${width}px`);
   }
 
@@ -448,6 +489,7 @@ try {
   console.log('\n[без JS]');
   await p.send('Emulation.setScriptExecutionDisabled', { value: true });
   await open(1440, 900);
+  await sleep(1800); // входная CSS-анимация первого экрана (задержка 0.55 с + 1 с) должна закончиться
   s = await J(`
     const els = [...document.querySelectorAll('main *, header *, footer *')].filter((el) => !el.closest('.sr-only, svg, [hidden]') && [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()));
     const hidden = els.filter((el) => !el.checkVisibility({ opacityProperty: true, visibilityProperty: true }) && !el.closest('.menu-toggle')).map((el) => el.textContent.trim().slice(0, 30));
@@ -466,6 +508,76 @@ try {
   // ---------- 10. Консоль ----------
   console.log('\n[консоль]');
   check('консоль чистая (ошибки и предупреждения во всех прогонах)', consoleLog.length === 0, consoleLog.length ? consoleLog.join('\n   ') : '0 сообщений');
+  await p.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: themeScript.identifier });
+}
+
+// ---------- Переключатель темы ----------
+async function themeChecks() {
+  prefix = '[переключатель] ';
+  consoleLog = [];
+  console.log('\n========== Переключатель темы ==========');
+  await open(1440, 900);
+  await p.eval(`localStorage.removeItem('${THEME_KEY}'); true`);
+  await p.goto(BASE);
+  const state = () => J(`const b = document.querySelector('[data-theme-toggle]'); const r = b.getBoundingClientRect();
+    return { theme: document.documentElement.dataset.theme, pressed: b.getAttribute('aria-pressed'), label: b.getAttribute('aria-label'),
+      meta: document.querySelector('meta[name="theme-color"]').getAttribute('content'), stored: localStorage.getItem('${THEME_KEY}'),
+      bg: getComputedStyle(document.documentElement).backgroundColor, w: Math.round(r.width), h: Math.round(r.height), visible: b.checkVisibility(),
+      nextToMenu: b.nextElementSibling === document.querySelector('[data-menu-toggle]') };`);
+  let t = await state();
+  check('по умолчанию светлая; кнопка «Тёмная тема», aria-pressed=false, 44×44, рядом с «Меню»',
+    t.theme === 'light' && t.pressed === 'false' && t.label === 'Тёмная тема' && t.meta === '#f5f5f0' && t.visible && t.w >= 44 && t.h >= 44 && t.nextToMenu, JSON.stringify(t));
+  const r = await rectOf('[data-theme-toggle]');
+  await p.click(r.x, r.y);
+  await sleep(100);
+  t = await state();
+  check('клик: тёмная тема, aria-pressed=true, сохранено, theme-color обновлён', t.theme === 'dark' && t.pressed === 'true' && t.stored === 'dark' && t.meta === '#0e0d0b' && t.bg === 'rgb(14, 13, 11)', JSON.stringify(t));
+  await p.eval(`document.querySelector('[data-theme-toggle]').focus()`);
+  await p.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' });
+  await p.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+  await sleep(100);
+  const afterEnter = await state();
+  await p.send('Input.dispatchKeyEvent', { type: 'keyDown', key: ' ', code: 'Space', windowsVirtualKeyCode: 32, text: ' ' });
+  await p.send('Input.dispatchKeyEvent', { type: 'keyUp', key: ' ', code: 'Space', windowsVirtualKeyCode: 32 });
+  await sleep(100);
+  const afterSpace = await state();
+  check('клавиатура: Enter → светлая, Space → тёмная', afterEnter.theme === 'light' && afterEnter.pressed === 'false' && afterEnter.stored === 'light' && afterSpace.theme === 'dark' && afterSpace.stored === 'dark',
+    `Enter: ${afterEnter.theme}/${afterEnter.pressed}, Space: ${afterSpace.theme}/${afterSpace.pressed}`);
+
+  // Без вспышки: тема выставлена до разбора <body>, и уже первый кадр — в цвете темы
+  const probe = await p.send('Page.addScriptToEvaluateOnNewDocument', { source: `
+    window.__themeProbe = {};
+    new MutationObserver(() => {
+      const el = document.documentElement;
+      if (el && el.hasAttribute('data-theme') && !__themeProbe.set) {
+        __themeProbe.set = true; __themeProbe.bodyExisted = !!document.body; __themeProbe.value = el.getAttribute('data-theme');
+      }
+    }).observe(document, { attributes: true, subtree: true, attributeFilter: ['data-theme'] });
+    requestAnimationFrame(() => {
+      __themeProbe.firstFrameTheme = document.documentElement.getAttribute('data-theme');
+      __themeProbe.firstFrameBg = getComputedStyle(document.documentElement).backgroundColor;
+    });` });
+  for (const [theme, bg] of [['dark', 'rgb(14, 13, 11)'], ['light', 'rgb(245, 245, 240)']]) {
+    await p.eval(`localStorage.setItem('${THEME_KEY}', '${theme}'); true`);
+    await p.goto(BASE);
+    const pr = await J('return window.__themeProbe');
+    const st = await state();
+    check(`перезагрузка с сохранённой «${theme}»: тема до <body>, первый кадр в цвете темы`,
+      pr.set && pr.bodyExisted === false && pr.value === theme && pr.firstFrameTheme === theme && pr.firstFrameBg === bg && st.pressed === String(theme === 'dark'),
+      `атрибут поставлен до <body>: ${pr.bodyExisted === false}; первый кадр: ${pr.firstFrameTheme}, фон ${pr.firstFrameBg}; aria-pressed=${st.pressed}`);
+  }
+  await p.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: probe.identifier });
+  await p.eval(`localStorage.setItem('${THEME_KEY}', 'garbage'); true`);
+  await p.goto(BASE);
+  check('неизвестное значение в хранилище → светлая', (await state()).theme === 'light');
+  await p.eval(`localStorage.removeItem('${THEME_KEY}'); true`);
+  collectConsole('переключатель');
+  check('консоль чистая', consoleLog.length === 0, consoleLog.join(' | ') || '0 сообщений');
+}
+
+try {
+  for (const theme of THEMES) await suite(theme);
+  await themeChecks();
 } catch (error) {
   check('сценарий проверки выполнился без исключений', false, error.stack);
 } finally {

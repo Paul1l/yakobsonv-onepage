@@ -1,5 +1,6 @@
 // Точка входа. Каждый блок инициализируется отдельно: сбой одного не ломает остальные,
 // а неинициализированный блок остаётся в статичном виде со всем текстом.
+import { initTheme } from './theme.js';
 import { initReveal } from './reveal.js';
 import { initMenu } from './menu.js';
 import { initLaptop } from './laptop.js';
@@ -11,7 +12,7 @@ import { initTopics } from './contacts.js';
 
 document.documentElement.classList.add('js');
 
-const modules = { initMenu, initLaptop, initCarousel, initMarquee, initNiches, initProcess, initTopics, initReveal };
+const modules = { initTheme, initMenu, initLaptop, initCarousel, initMarquee, initNiches, initProcess, initTopics, initReveal };
 
 for (const [name, init] of Object.entries(modules)) {
   try {

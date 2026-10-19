@@ -1,79 +1,106 @@
-// Контраст фактических сочетаний палитры (WCAG 2.x). Запуск: node scripts/contrast.mjs
-// Полупрозрачные слои пересчитаны в непрозрачные цвета поверх реального фона (mix).
+// Контраст фактических сочетаний палитры (WCAG 2.x) для ОБЕИХ тем.
+// Значения читаются прямо из блоков тем в styles.css — таблица не может разойтись с CSS.
+// Полупрозрачные цвета накладываются на реальную подложку. Запуск: node scripts/contrast.mjs [--md]
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-const hex = (h) => {
-  const v = h.replace('#', '');
-  return [0, 2, 4].map((i) => parseInt(v.slice(i, i + 2), 16));
+const css = readFileSync(fileURLToPath(new URL('../styles.css', import.meta.url)), 'utf8');
+
+function block(selectorStart) {
+  const i = css.indexOf(selectorStart);
+  if (i < 0) throw new Error(`нет блока ${selectorStart}`);
+  const body = css.slice(css.indexOf('{', i) + 1, css.indexOf('\n}', i));
+  const vars = {};
+  for (const m of body.matchAll(/--([\w-]+):\s*([^;]+);/g)) vars[m[1]] = m[2].trim();
+  return vars;
+}
+const themes = {
+  'Светлая': block(":root,\n:root[data-theme='light']"),
+  'Тёмная': block(":root[data-theme='dark']"),
 };
-const toHex = (rgb) => `#${rgb.map((c) => Math.round(c).toString(16).padStart(2, '0')).join('')}`;
-/** Наложение цвета fg с прозрачностью a поверх bg. */
-const mix = (fg, a, bg) => toHex(hex(fg).map((c, i) => c * a + hex(bg)[i] * (1 - a)));
-const lum = (h) => {
-  const [r, g, b] = hex(h).map((c) => {
+
+const parse = (value) => {
+  const v = value.trim();
+  let m = v.match(/^#([0-9a-f]{6})$/i);
+  if (m) return [0, 2, 4].map((k) => parseInt(m[1].slice(k, k + 2), 16)).concat(1);
+  m = v.match(/^rgba?\(([^)]+)\)$/i);
+  if (m) {
+    const [r, g, b, a = 1] = m[1].split(',').map(Number);
+    return [r, g, b, a];
+  }
+  throw new Error(`не цвет: ${value}`);
+};
+const over = (fg, bg) => fg.slice(0, 3).map((c, k) => c * fg[3] + bg[k] * (1 - fg[3])).concat(1);
+const lum = ([r, g, b]) => {
+  const ch = (c) => {
     const s = c / 255;
     return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
-  });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  return 0.2126 * ch(r) + 0.7152 * ch(g) + 0.0722 * ch(b);
 };
-export const ratio = (a, b) => {
+const ratio = (a, b) => {
   const [l1, l2] = [lum(a), lum(b)].sort((x, y) => y - x);
   return (l1 + 0.05) / (l2 + 0.05);
 };
+const hex = (c) => `#${c.slice(0, 3).map((x) => Math.round(x).toString(16).padStart(2, '0')).join('')}`;
 
-// Значения синхронизированы с :root в styles.css
-const C = {
-  bg: '#111213',
-  card: '#1a1c1e',
-  screen: '#0c0e0f',
-  text: '#eef1ef',
-  muted: '#9eaca5',
-  mint: '#8fd8bb',
-  violet: '#b9a9f2',
-  mintInk: '#0d1713',
-  control: '#66736d',
-  tBg: '#e3eae5',
-  tSurface: '#f2f6f3',
-  tText: '#17211c',
-  tMuted: '#45554d',
-  tAccent: '#2b6a52',
-  tChip: '#d3ded7',
-};
-const violetBadge = mix('#b9a9f2', 0.14, C.screen);
-const mintTint = mix('#8fd8bb', 0.08, C.bg);
+/** Цвет токена; полупрозрачный — поверх цепочки подложек (последняя — непрозрачная). */
+function resolve(vars, names) {
+  const layers = names.map((n) => parse(vars[n] ?? (() => { throw new Error(`нет токена --${n}`); })()));
+  let color = layers[layers.length - 1];
+  for (let k = layers.length - 2; k >= 0; k--) color = over(layers[k], color);
+  return color;
+}
 
-const pairs = [
-  ['Основной текст / фон', C.text, C.bg, 4.5],
-  ['Второстепенный (серо-зелёный) / фон', C.muted, C.bg, 4.5],
-  ['Второстепенный / карточка', C.muted, C.card, 4.5],
-  ['Мятный акцент (текст) / фон', C.mint, C.bg, 4.5],
-  ['Фиолетовый акцент (текст) / карточка', C.violet, C.card, 4.5],
-  ['Текст кнопки / мятная кнопка', C.mintInk, C.mint, 4.5],
-  ['Основной текст / экран ноутбука', C.text, C.screen, 4.5],
-  ['Второстепенный / экран ноутбука', C.muted, C.screen, 4.5],
-  ['Мятный (рост) / экран ноутбука', C.mint, C.screen, 4.5],
-  ['«Демонстрационные данные» / плашка', C.violet, violetBadge, 4.5],
-  ['Мятный текст / мятная подложка темы', C.mint, mintTint, 4.5],
-  ['Рамка контролов / фон', C.control, C.bg, 3],
-  ['Рамка контролов / карточка', C.control, C.card, 3],
-  ['Кольцо фокуса (мятный) / фон', C.mint, C.bg, 3],
-  ['Планшет: текст / экран', C.tText, C.tBg, 4.5],
-  ['Планшет: текст / карточка', C.tText, C.tSurface, 4.5],
-  ['Планшет: второстепенный / экран', C.tMuted, C.tBg, 4.5],
-  ['Планшет: второстепенный / карточка', C.tMuted, C.tSurface, 4.5],
-  ['Планшет: акцент (номер ниши) / карточка', C.tAccent, C.tSurface, 4.5],
-  ['Планшет: задачи / плашка', C.tText, C.tChip, 4.5],
+// [подпись, текст/рамка (цепочка), фон (цепочка), норма]
+const PAIRS = [
+  ['Основной текст / фон', ['text'], ['bg'], 4.5],
+  ['Мягкий текст / фон', ['text-soft'], ['bg'], 4.5],
+  ['Второстепенный / фон', ['muted'], ['bg'], 4.5],
+  ['Второстепенный / карточка', ['muted'], ['surface'], 4.5],
+  ['Второстепенный / мягкий фон', ['muted'], ['surface-soft'], 4.5],
+  ['Акцент (текст) / фон', ['accent'], ['bg'], 4.5],
+  ['Акцент (текст) / карточка', ['accent'], ['surface'], 4.5],
+  ['Акцент / оттенок акцента (плашка темы)', ['accent'], ['accent-tint', 'surface'], 4.5],
+  ['Текст / оттенок акцента (наведение)', ['text'], ['accent-tint', 'bg'], 4.5],
+  ['Текст основной кнопки / кнопка', ['btn-text'], ['btn-bg'], 4.5],
+  ['Текст основной кнопки / наведение', ['btn-text'], ['btn-bg-hover'], 4.5],
+  ['Текст / полупрозрачная шапка', ['text'], ['header-bg', 'bg'], 4.5],
+  ['Экран ноутбука: текст', ['screen-text'], ['screen-bg'], 4.5],
+  ['Экран ноутбука: второстепенный / плитка', ['screen-muted'], ['screen-panel-a', 'screen-bg'], 4.5],
+  ['Экран ноутбука: рост / плитка', ['screen-positive'], ['screen-panel-a', 'screen-bg'], 4.5],
+  ['Экран ноутбука: рост / выделенная плитка', ['screen-positive'], ['screen-feature', 'screen-bg'], 4.5],
+  ['«Демонстрационные данные» / плашка', ['screen-badge-text'], ['screen-badge-bg', 'screen-bg'], 4.5],
+  ['Планшет: текст / экран', ['t-text'], ['t-bg'], 4.5],
+  ['Планшет: текст / карточка', ['t-text'], ['t-surface'], 4.5],
+  ['Планшет: второстепенный / карточка', ['t-muted'], ['t-surface'], 4.5],
+  ['Планшет: номер ниши / карточка', ['t-accent'], ['t-surface'], 4.5],
+  ['Планшет: задачи / плашка', ['t-text'], ['t-chip'], 4.5],
+  ['Рамка контролов / фон', ['control'], ['bg'], 3],
+  ['Рамка контролов / карточка', ['control'], ['surface'], 3],
+  ['Неактивный индикатор / фон', ['dot-off'], ['bg'], 3],
+  ['Кольцо фокуса (акцент) / фон', ['accent'], ['bg'], 3],
+  ['Кольцо фокуса (акцент) / карточка', ['accent'], ['surface'], 3],
 ];
 
+const md = process.argv.includes('--md');
 let failed = 0;
-const rows = pairs.map(([name, fg, bg, min]) => {
-  const r = ratio(fg, bg);
-  const ok = r >= min;
-  if (!ok) failed++;
-  return `| ${name} | ${fg} на ${bg} | ${r.toFixed(2)}:1 | ≥ ${min} | ${ok ? 'да' : 'НЕТ'} |`;
-});
-console.log('| Сочетание | Цвета | Контраст | Норма | Ок |\n|---|---|---|---|---|');
-console.log(rows.join('\n'));
+for (const [theme, vars] of Object.entries(themes)) {
+  console.log(md ? `\n**${theme} тема**\n\n| Сочетание | Цвета | Контраст | Норма |\n|---|---|---|---|` : `\n${theme} тема`);
+  for (const [name, fgNames, bgNames, min] of PAIRS) {
+    const bg = resolve(vars, bgNames);
+    const fg = resolve(vars, [...fgNames, ...bgNames]);
+    const r = ratio(fg, bg);
+    const ok = r >= min;
+    if (!ok) failed++;
+    const line = md
+      ? `| ${name} | ${hex(fg)} на ${hex(bg)} | ${r.toFixed(2)}:1${ok ? '' : ' ✗'} | ≥ ${min} |`
+      : ` ${ok ? '✓' : '✗'} ${name}: ${hex(fg)} на ${hex(bg)} — ${r.toFixed(2)}:1 (≥ ${min})`;
+    console.log(line);
+  }
+}
 if (failed) {
-  console.error(`contrast: не проходят ${failed}`);
+  console.error(`\ncontrast: не проходят ${failed}`);
   process.exit(1);
 }
+console.log(`\ncontrast: все ${PAIRS.length * 2} пар проходят`);
