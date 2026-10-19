@@ -15,7 +15,7 @@ const arg = (name, def) => (process.argv.find((a) => a.startsWith(`--${name}=`))
 const themes = arg('theme', 'both') === 'both' ? ['light', 'dark'] : [arg('theme', 'both')];
 const SIZES = { 1440: 900, 1024: 768, 768: 1024, 390: 844 };
 const widths = arg('widths', '1440,1024,768,390').split(',').map(Number);
-const sections = ['top', 'overview', 'directions', 'cms', 'niches', 'process', 'about', 'contacts'];
+const sections = ['top', 'overview', 'check', 'directions', 'cms', 'niches', 'proof', 'process', 'about', 'contacts'];
 
 try {
   for (const theme of themes) {

@@ -4,15 +4,15 @@ import { initTheme } from './theme.js';
 import { initReveal } from './reveal.js';
 import { initMenu } from './menu.js';
 import { initLaptop } from './laptop.js';
+import { initDashboard } from './dashboard.js';
 import { initCarousel } from './carousel.js';
 import { initMarquee } from './marquee.js';
 import { initNiches } from './niches.js';
 import { initProcess } from './process.js';
-import { initTopics } from './contacts.js';
 
 document.documentElement.classList.add('js');
 
-const modules = { initTheme, initMenu, initLaptop, initCarousel, initMarquee, initNiches, initProcess, initTopics, initReveal };
+const modules = { initTheme, initMenu, initLaptop, initDashboard, initCarousel, initMarquee, initNiches, initProcess, initReveal };
 
 for (const [name, init] of Object.entries(modules)) {
   try {

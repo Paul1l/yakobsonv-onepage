@@ -97,7 +97,6 @@ const contrastAudit = () => J(`
   const bgOf = (el) => { const stack = []; for (let n = el; n; n = n.parentElement) { const c = parse(getComputedStyle(n).backgroundColor); if (c && c[3] > 0) { stack.push(c); if (c[3] >= 1) break; } }
     let base = [255, 255, 255, 1]; for (let i = stack.length - 1; i >= 0; i--) base = stack[i][3] >= 1 ? stack[i] : over(stack[i], base); return base; };
   const els = [...document.querySelectorAll('body *')].filter((el) => !el.closest('.sr-only, svg, [aria-hidden="true"], dialog:not([open]), .skip-link')
-    && !(el.classList.contains('hero__line') && el.previousElementSibling)
     && [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) && el.checkVisibility({ opacityProperty: true, visibilityProperty: true }));
   const fails = []; let min = 99;
   for (const el of els) {
@@ -137,8 +136,9 @@ async function suite(theme) {
       const de = document.documentElement;
       const headings = [...document.querySelectorAll('h1, h2, h3, h4')].map((h) => Number(h.tagName[1]));
       let skips = 0; for (let i = 1; i < headings.length; i++) if (headings[i] - headings[i - 1] > 1) skips++;
+      // .text-link — ссылка внутри предложения: исключение WCAG 2.5.8 для строчных ссылок в тексте
       const small = [...document.querySelectorAll('a[href], button')].filter((el) => {
-        if (el.closest('dialog, .sr-only, [aria-hidden="true"]') || el.classList.contains('skip-link')) return false;
+        if (el.closest('dialog, .sr-only, [aria-hidden="true"]') || el.classList.contains('skip-link') || el.classList.contains('text-link')) return false;
         if (!el.checkVisibility()) return false;
         const r = el.getBoundingClientRect();
         return r.width < 44 - 0.5 || r.height < 44 - 0.5;
@@ -191,13 +191,19 @@ async function suite(theme) {
   check('Esc закрывает меню, фокус возвращается на «Меню», прокрутка разблокирована', !s.open && s.back && s.lock !== 'hidden', JSON.stringify(s));
   await p.click(r.x, r.y);
   await sleep(450);
-  r = await rectOf('#site-menu a[href="#niches"]');
+  s = await J(`const items = [...document.querySelectorAll('#site-menu .menu__list a')];
+    return { n: items.length, labels: items.map((a) => a.querySelector('.menu__label').textContent.trim() + ' / ' + a.querySelector('.menu__hint').textContent.trim()),
+      local: items.filter((a) => a.getAttribute('href').startsWith('#')).map((a) => a.getAttribute('href')).filter((h) => !document.querySelector(h)),
+      ext: items.filter((a) => a.href.startsWith('https://yakobsonv.com/ru/')).length };`);
+  check('меню: 7 пунктов с подсказками как на yakobsonv.com, якоря ведут на разделы страницы, остальное — на yakobsonv.com',
+    s.n === 7 && s.local.length === 0 && s.ext === 3, `${s.labels.join(' | ')}; битых якорей: ${s.local.length}; внешних: ${s.ext}`);
+  r = await rectOf('#site-menu a[href="#about"]');
   await p.click(r.x, r.y);
   await sleep(1600);
-  s = await J(`const h = document.getElementById('niches-title'); const grid = document.querySelector('#niches .niches__grid');
+  s = await J(`const h = document.getElementById('about-title'); const grid = document.querySelector('#about .about__inner');
     return { open: document.getElementById('site-menu').open, top: Math.round(h.getBoundingClientRect().top), content: Math.round(grid.getBoundingClientRect().top), header: document.querySelector('.site-header').getBoundingClientRect().bottom, vh: innerHeight, focus: document.activeElement === h, hash: location.hash };`);
-  check('переход «Ниши» из меню: меню закрыто, раздел сразу под шапкой, заголовок не перекрыт, фокус на заголовке',
-    !s.open && s.top >= s.header && s.top < s.vh / 2 && s.content >= s.header && s.content <= s.header + 48 && s.focus && s.hash === '#niches', JSON.stringify(s));
+  check('переход «О компании» из меню: меню закрыто, раздел сразу под шапкой, заголовок не перекрыт, фокус на заголовке',
+    !s.open && s.top >= s.header && s.top < s.vh / 2 && s.content >= s.header && s.content <= s.header + 48 && s.focus && s.hash === '#about', JSON.stringify(s));
   for (const id of ['directions', 'process', 'contacts']) {
     await p.click(...Object.values(await rectOf('[data-menu-toggle]')).slice(0, 2));
     await sleep(400);
@@ -446,14 +452,17 @@ async function suite(theme) {
 
   // ---------- 7. Ноутбук ----------
   console.log('\n[ноутбук]');
-  const lp = () => J(`const d = document.querySelector('.laptop'); const cs = getComputedStyle(d); const scr = d.querySelector('.laptop__screen'); const sr = scr.getBoundingClientRect(); const dashEl = d.querySelector('.dash');
+  const lp = () => J(`const d = document.querySelector('.laptop'); const cs = getComputedStyle(d); const scr = d.querySelector('.laptop__screen'); const sr = scr.getBoundingClientRect(); const panes = d.querySelector('.dash__panes');
     const texts = [...scr.querySelectorAll('*')].filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()));
     const minFont = Math.min(...texts.map((el) => parseFloat(getComputedStyle(el).fontSize)));
-    const badge = [...scr.querySelectorAll('*')].find((el) => el.textContent.trim() === 'Демонстрационные данные'); const br = badge.getBoundingClientRect();
+    const badge = scr.querySelector('.dash__badge'); const br = badge.getBoundingClientRect();
+    const note = document.querySelector('.overview__note');
     return { rx: cs.getPropertyValue('--rx').trim(), ry: cs.getPropertyValue('--ry').trim(), transform: cs.transform.slice(0, 30), width: d.offsetWidth, minFont,
-      badge: badge.checkVisibility({ opacityProperty: true, visibilityProperty: true }) && br.top >= sr.top && br.bottom <= sr.bottom, badgeFont: getComputedStyle(badge).fontSize,
-      // .dash лежит поверх экрана (inset: 0), поэтому «влезает» = нет внутренней вертикальной прокрутки
-      fits: dashEl.scrollHeight <= dashEl.clientHeight + 1, overflowPx: dashEl.scrollHeight - dashEl.clientHeight, ratio: +(scr.offsetWidth / scr.offsetHeight).toFixed(2) };`);
+      // на экране — плашка «Sample», под ноутбуком — примечание «Демонстрационные данные. …» (тексты yakobsonv.com)
+      badge: badge.textContent.trim() === 'Sample' && badge.checkVisibility({ opacityProperty: true, visibilityProperty: true }) && br.top >= sr.top && br.bottom <= sr.bottom
+        && note.textContent.startsWith('Демонстрационные данные.') && note.checkVisibility({ opacityProperty: true, visibilityProperty: true }), badgeFont: getComputedStyle(badge).fontSize,
+      // интерфейс лежит поверх экрана (inset: 0); «влезает» = во вкладке «Обзор» нет внутренней вертикальной прокрутки
+      fits: panes.scrollHeight <= panes.clientHeight + 1, overflowPx: panes.scrollHeight - panes.clientHeight, ratio: +(scr.offsetWidth / scr.offsetHeight).toFixed(2) };`);
   for (const [w, h, minAllowed] of [[1440, 900, 11], [390, 844, 11], [375, 812, 11]]) {
     await open(w, h);
     await p.eval(`const s = document.querySelector('[data-laptop]'); window.scrollTo(0, s.getBoundingClientRect().top + scrollY - innerHeight * 0.85)`);
@@ -462,7 +471,7 @@ async function suite(theme) {
     await center('[data-laptop]');
     b = await lp();
     check(`${w}px: ракурс ноутбука меняется при прокрутке`, a.rx !== b.rx && Math.abs(parseFloat(a.rx) - parseFloat(b.rx)) > 2, `rotateX ${a.rx} → ${b.rx}, rotateY ${a.ry} → ${b.ry}`);
-    check(`${w}px: экран читаем — кегль ≥ ${minAllowed} px, содержимое в экране, «Демонстрационные данные» видно`, b.minFont >= minAllowed && b.fits && b.badge, `мин. кегль ${b.minFont}px, плашка ${b.badgeFont}, ширина ноутбука ${b.width}px, экран ${b.ratio}:1, не влезло ${b.overflowPx}px`);
+    check(`${w}px: экран читаем — кегль ≥ ${minAllowed} px, «Обзор» помещается в экран, «Sample» на экране и «Демонстрационные данные.» под ним видны`, b.minFont >= minAllowed && b.fits && b.badge, `мин. кегль ${b.minFont}px, плашка ${b.badgeFont}, ширина ноутбука ${b.width}px, экран ${b.ratio}:1, не влезло ${b.overflowPx}px`);
     if (w === 1440) check('ширина ноутбука ≤ 620 px', b.width <= 620, `${b.width}px`);
     const sec = await J(`return { h: Math.round(document.getElementById('overview').getBoundingClientRect().height), vh: innerHeight };`);
     check(`${w}px: раздел с ноутбуком не длиннее ~1 экрана`, sec.h <= sec.vh * 1.2, `высота раздела ${sec.h}px при экране ${sec.vh}px`);
@@ -477,15 +486,56 @@ async function suite(theme) {
   check('reduced-motion: ракурс ноутбука не меняется', a.rx === b.rx, `rotateX ${a.rx} → ${b.rx}`);
   collectConsole('ноутбук reduced');
 
-  // ---------- 8. Подробнее → контакты ----------
+  // ---------- 7б. Вкладки превью дашборда ----------
+  console.log('\n[вкладки дашборда]');
+  const dt = () => J(`const tabs = [...document.querySelectorAll('[data-dash-tabs] [role="tab"]')]; const panes = [...document.querySelectorAll('[data-pane]')]; const sc = document.querySelector('.dash__panes');
+    return { shown: document.querySelector('[data-dash-tabs]').checkVisibility(), selected: tabs.map((t) => t.getAttribute('aria-selected')).indexOf('true'), focus: tabs.indexOf(document.activeElement),
+      tabindex: tabs.map((t) => t.tabIndex).join(''), visible: panes.filter((x) => !x.hidden).map((x) => x.id), over: sc.scrollHeight - sc.clientHeight,
+      labelled: panes.every((x) => x.getAttribute('role') === 'tabpanel' && document.getElementById(x.getAttribute('aria-labelledby')) && x.tabIndex === 0) };`);
+  for (const [w, h] of [[1440, 900], [390, 844]]) {
+    await open(w, h);
+    await center('[data-laptop]');
+    const overs = [];
+    let ok = true;
+    for (let i = 0; i < 5; i++) {
+      r = await rectOf(`[data-dash-tabs] [role="tab"]:nth-child(${i + 1})`);
+      await p.click(r.x, r.y);
+      await sleep(150);
+      s = await dt();
+      ok &&= s.shown && s.selected === i && s.visible.length === 1 && s.labelled;
+      overs.push(`${s.visible[0]?.replace('dash-', '')} ${s.over}px`);
+      if (w === 1440) ok &&= s.over <= 1;
+    }
+    check(`${w}px: 5 вкладок (Обзор…Задачи) переключают панели экрана, видна одна; панели tabpanel с tabindex=0${w === 1440 ? ', все помещаются без прокрутки' : ' (что не влезло — прокручивается внутри экрана)'}`,
+      ok, `переполнение: ${overs.join(', ')}`);
+    collectConsole(`вкладки ${w}`);
+  }
+  await p.eval(`document.querySelector('[data-dash-tabs] [role="tab"]').click(); document.querySelector('[data-dash-tabs] [role="tab"]').focus(); true`);
+  const seqTabs = [];
+  for (const key of ['ArrowRight', 'End', 'Home', 'ArrowLeft']) {
+    await press(key);
+    await sleep(60);
+    const q = await dt();
+    seqTabs.push(`${q.selected}/${q.focus}`);
+  }
+  check('клавиатура во вкладках: → End Home ← (с переходом по кругу), фокус следует за выбором, roving tabindex', seqTabs.join(',') === '1/1,4/4,0/0,4/4' && (await dt()).tabindex === '-1-1-1-10',
+    `выбор/фокус: ${seqTabs.join(', ')}`);
+  collectConsole('вкладки клавиатура');
+
+  // ---------- 8. Ссылки ----------
+  console.log('\n[ссылки]');
   await open(1440, 900);
-  await center('[data-carousel]');
-  r = await rectOf('[data-card].is-current .dcard__more');
-  await p.click(r.x, r.y);
-  await sleep(1400);
-  s = await J(`const note = document.querySelector('[data-topic-note]'); return { shown: !note.hidden, text: note.textContent.trim(), mail: document.querySelector('[data-mail]').getAttribute('href'), top: Math.round(document.getElementById('contacts-title').getBoundingClientRect().top), hash: location.hash };`);
-  check('«Подробнее» ведёт к контактам и подставляет тему', s.shown && /Разработка сайтов/.test(s.text) && s.mail.includes('subject=') && s.hash === '#contacts' && s.top >= 64, JSON.stringify(s));
-  collectConsole('подробнее');
+  s = await J(`const links = [...document.querySelectorAll('a[href]')];
+    const ext = links.filter((a) => /^https?:/.test(a.getAttribute('href')));
+    const blank = ext.filter((a) => a.target === '_blank');
+    return { more: document.querySelector('[data-card] .dcard__more').href, forms: document.querySelectorAll('form, input, textarea').length,
+      badLocal: links.filter((a) => a.getAttribute('href').startsWith('#') && a.getAttribute('href').length > 1 && !document.getElementById(a.getAttribute('href').slice(1))).map((a) => a.getAttribute('href')),
+      hosts: [...new Set(ext.map((a) => new URL(a.href).host))].join(','), unsafeBlank: blank.filter((a) => !/noopener/.test(a.rel) || !/noreferrer/.test(a.rel)).length,
+      mail: [...new Set(links.filter((a) => a.protocol === 'mailto:').map((a) => a.getAttribute('href')))].join(','), tg: [...new Set(links.filter((a) => a.host === 't.me').map((a) => a.href))].join(',') };`);
+  check('«Подробнее» ведёт на услугу на yakobsonv.com; форм нет (нет сервера); якоря целые; внешние ссылки — только yakobsonv.com и t.me; _blank с noopener noreferrer',
+    s.more === 'https://yakobsonv.com/ru/services/#sites' && s.forms === 0 && s.badLocal.length === 0 && /^(yakobsonv\.com|t\.me)(,(yakobsonv\.com|t\.me))?$/.test(s.hosts) && s.unsafeBlank === 0
+      && s.mail === 'mailto:yakobsonv@icloud.com' && s.tg === 'https://t.me/yakobsonv', JSON.stringify(s));
+  collectConsole('ссылки');
 
   // ---------- 9. Без JS ----------
   console.log('\n[без JS]');
@@ -496,7 +546,8 @@ async function suite(theme) {
     const els = [...document.querySelectorAll('main *, header *, footer *')].filter((el) => !el.closest('.sr-only, svg, [hidden]') && [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()));
     const hidden = els.filter((el) => !el.checkVisibility({ opacityProperty: true, visibilityProperty: true }) && !el.closest('.menu-toggle')).map((el) => el.textContent.trim().slice(0, 30));
     const text = document.body.innerText;
-    const must = ['ВЫДЕЛЯТЬСЯ.', 'Демонстрационные данные', 'ИИ в работе с клиентами', 'Самописные CMS', 'SaaS и онлайн-сервисы', 'Контроль качества', 'ДИЗАЙН СО СМЫСЛОМ.', 'yakobsonv@icloud.com', 'Наверх'];
+    const must = ['Делаем сайт, приводим', 'Демонстрационные данные.', 'Дедлайн квартальной цели', 'продукт + характеристика', 'ИИ в работе с клиентами', 'PHP, Laravel, Symfony',
+      'SaaS и онлайн-сервисы', 'Контроль качества', 'Владислав', 'yakobsonv@icloud.com', 'ОГРНИП 322220200098746', 'Наверх'];
     return { total: els.length, hidden, missing: must.filter((m) => !text.includes(m)), js: document.documentElement.classList.contains('js') };`);
   check('без JS весь текст виден (кроме кнопок управления, которые без JS не работают и скрыты атрибутом hidden)', !s.js && s.hidden.length === 0 && s.missing.length === 0, `текстовых элементов ${s.total}, скрытых ${s.hidden.length}${s.hidden.length ? ': ' + s.hidden.join(' | ') : ''}; нет в тексте: ${s.missing.join(', ') || '—'}`);
   await scrollThrough();
