@@ -836,9 +836,11 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
   --deck: 0.6;
   position: relative;
   /* Ширина ограничена и высотой окна: на низком экране (телефон лёжа, 844×390, 740×360) экран ноутбука и кнопки вкладок
-     помещаются вместе под шапкой. 1.6 = 16:10, 28px — рамка крышки, 128px — низ крышки, основание, отступ, ряд вкладок и запас на наклон при прокрутке. */
-  width: min(620px, 100%, calc((100vh - var(--header-h) - 128px) * 1.6 + 28px));
-  width: min(620px, 100%, calc((100svh - var(--header-h) - 128px) * 1.6 + 28px));
+     помещаются вместе под шапкой. 1.6 = 16:10, 28px — рамка крышки, 128px — низ крышки, основание, отступ, ряд вкладок и запас на наклон при прокрутке.
+     Нижняя граница 308px (экран ≈280px): ниже компактная раскладка дашборда не помещается — на очень низких экранах
+     (≤350px, телефон лёжа с панелями браузера) читаемость важнее, чем экран и вкладки в одном кадре. */
+  width: min(620px, 100%, max(308px, calc((100vh - var(--header-h) - 128px) * 1.6 + 28px)));
+  width: min(620px, 100%, max(308px, calc((100svh - var(--header-h) - 128px) * 1.6 + 28px)));
   transform: rotateX(var(--rx)) rotateY(var(--ry));
   transform-origin: 50% 85%;
 }
@@ -1215,7 +1217,7 @@ html:not(.has-theme-toggle) .theme-toggle { visibility: hidden; }
    Surface/Framework; MacBook Air — 1.54), основание тоньше — силуэт ноутбука сохраняется */
 @media (max-width: 559px) {
   .laptop-stage { padding-inline: 12px; }
-  .laptop { width: min(620px, 100%, calc((100svh - var(--header-h) - 128px) * 1.5 + 16px)); }
+  .laptop { width: min(620px, 100%, max(296px, calc((100svh - var(--header-h) - 128px) * 1.5 + 16px))); }
   .laptop__lid { padding: 10px 8px 9px; border-radius: 14px 14px 6px 6px; }
   .laptop__cam { top: 3px; width: 4px; height: 4px; margin-left: -2px; }
   .laptop__screen { aspect-ratio: 3 / 2; border-radius: 5px; }
